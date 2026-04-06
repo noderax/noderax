@@ -7,7 +7,6 @@ import {
   UsersRound,
 } from "lucide-react";
 import { GradientText } from "@/components/ui/gradient-text";
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -20,31 +19,31 @@ import { ScrollReveal } from "@/components/ui/scroll-reveal";
 const governanceCards = [
   {
     icon: LockKeyhole,
-    title: "Global Identity & SSO",
+    title: "Identity & Session Security",
     description:
-      "Enterprise authentication baked in natively. Enforce Multi-Factor Authentication, integrate OIDC-based Single Sign-On, and manage password policies universally.",
-    highlight: "Zero-Trust default posture",
+      "Invite-first accounts, password reset, TOTP MFA, and OIDC provider management are built into the default control plane.",
+    highlight: "Login, MFA, and OIDC",
   },
   {
     icon: UsersRound,
-    title: "Granular Workspace RBAC",
+    title: "Workspace RBAC & Teams",
     description:
-      "Segregate fleets into unified workspaces with strict owner, admin, member, and viewer roles. Ensure operational bounds are never crossed by unauthorized agents.",
-    highlight: "Isolated logical boundaries",
+      "Platform admins span the installation while workspace owner/admin/member/viewer roles scope who can mutate nodes, tasks, and settings.",
+    highlight: "Scoped operator access",
   },
   {
     icon: BellElectric,
-    title: "Intelligent Notification Matrix",
+    title: "Alert Routing With Overrides",
     description:
-      "Plug dynamic metric thresholds directly into Telegram and Email fan-outs. Automated alarms trigger on custom high CPU, offline cycles, or deployment failures instantly.",
-    highlight: "Proactive alerting loops",
+      "Workspace Email and Telegram automations filter INFO/WARNING/CRITICAL events, while node-specific rules suppress noisy node-scoped delivery.",
+    highlight: "Workspace rules + node exceptions",
   },
   {
     icon: ShieldCheck,
-    title: "Cryptographic Audit Trails",
+    title: "Root Profiles & Audit History",
     description:
-      "Every terminal command, scheduled rollback, or agent update leaves a persistent, immutable footprint on the control plane. Total visibility into operational history.",
-    highlight: "Immutable operational logs",
+      "Per-node root access profiles track desired/applied sync state, and task, terminal, node, rollout, and settings changes appear in audit views.",
+    highlight: "Least privilege + traceability",
   },
 ];
 
@@ -69,7 +68,10 @@ export function GovernanceSection() {
               <GradientText className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-primary">control plane</GradientText>
             </h2>
             <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
-              We didn't bolt security on. Noderax enforces stateful access rules, cryptographically tracks command origins, and intelligently segregates multi-tenant environments.
+              Security and operator boundaries are enforced in product surfaces,
+              not promised in policy docs. Authentication, privilege gates,
+              notification routing, and audit views are already part of the
+              shipped runtime.
             </p>
           </div>
         </ScrollReveal>

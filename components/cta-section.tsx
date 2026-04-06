@@ -2,16 +2,15 @@
 
 import { ArrowRight, CheckCircle2, Zap } from "lucide-react";
 import { GradientText } from "@/components/ui/gradient-text";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const callouts = [
-  "Self-reliant first-run installation and Redis validation",
-  "Zero-trust one-click workspace agent onboarding",
-  "Cohesive Terminal, Telegraphy, Audit, and Execution console",
+  "Installer-managed setup with PostgreSQL, Redis, and optional SMTP checks",
+  "Two-step add-node onboarding with live bootstrap progress",
+  "Root-aware tasks, terminals, notifications, and official release rollouts",
 ];
 
 export function CTASection() {
@@ -32,23 +31,25 @@ export function CTASection() {
                   <Zap className="mr-2 h-4 w-4" /> Start Orchestrating
                 </div>
                 <h2 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-5xl text-foreground">
-                  Take absolute control over your{" "}
-                  <GradientText className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-primary">infrastructure scale.</GradientText>
+                  Stand up the control plane, then grow into{" "}
+                  <GradientText className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-primary">daily operations.</GradientText>
                 </h2>
                 <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground/90">
-                  Deploy the Noderax control plane within minutes. Automate massive Linux fleet rollouts, secure remote access, and unify telemetry streaming instantly.
+                  The current platform already covers onboarding, telemetry,
+                  terminals, alerting, and agent release management without
+                  requiring extra sidecars or bolt-on operator tools.
                 </p>
 
                 <div className="mt-10 flex flex-wrap items-center gap-4">
-                  <a href="#" className={cn(buttonVariants({ size: "lg" }), "group/btn rounded-full shadow-lg shadow-primary/20 transition-all hover:shadow-primary/30")}>
-                    Deploy Control Plane
+                  <a href="#operations" className={cn(buttonVariants({ size: "lg" }), "group/btn rounded-full shadow-lg shadow-primary/20 transition-all hover:shadow-primary/30")}>
+                    See Rollout Workflow
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
                   </a>
                   <a
                     href="#faq"
                     className={cn(buttonVariants({ variant: "outline", size: "lg" }), "rounded-full bg-background/50 backdrop-blur transition-all hover:bg-background/80 hover:text-foreground")}
                   >
-                    View Documentation
+                    Read Technical FAQ
                   </a>
                 </div>
               </div>

@@ -10,7 +10,6 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { GradientText } from "@/components/ui/gradient-text";
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -27,18 +26,18 @@ const runtimeTabs = [
     id: "web",
     label: "Web Control Plane",
     icon: AppWindowMac,
-    title: "Next.js 16 Workspace-Aware Core",
+    title: "Next.js 16 Operator Surface",
     summary:
-      "A lightning-fast frontend that communicates through proxy layers, leaving the core protected. Everything from session context to unified state resides here.",
+      "App Router UI, auth handlers, workspace routing, and dedicated realtime and terminal clients shape the operator experience.",
     bullets: [
-      "Public auth boundaries managed tightly under protected routes",
-      "React Query handles backend state natively",
-      "Real-time terminal WebSockets render effortlessly",
+      "Protected route handlers proxy authenticated browser traffic",
+      "Workspace context and cache scoping stay tied to active views",
+      "Terminal and realtime sockets resolve separately from REST traffic",
     ],
-    sideTitle: "Impenetrable Experience",
+    sideTitle: "Browser Boundary",
     sideBody:
-      "By isolating the session boundary and leveraging route handlers, direct API exposure is entirely bypassed, preventing common threat vectors automatically.",
-    tags: ["Session context", "Real-time Native", "Zero-polling"],
+      "The browser never needs raw API credentials for every surface. Route handlers and cookies keep the public edge thinner and easier to reason about.",
+    tags: ["Session context", "Workspace-aware", "Realtime + terminal"],
   },
   {
     id: "api",
@@ -46,50 +45,50 @@ const runtimeTabs = [
     icon: Database,
     title: "NestJS Orchestration Engine",
     summary:
-      "The master choreographer. From the moment Noderax starts, it assesses its boot mode, spins up HTTP APIs, and establishes connections across the decentralized network.",
+      "The API owns installer boot mode, workspace rules, notifications, audit history, scheduling, diagnostics, and rollout orchestration.",
     bullets: [
-      "TypeORM maps multi-layer invariants instantly",
-      "Redis channels handle continuous state broadcast",
-      "Self-validating first-run setup across services",
+      "Installer-managed settings validate PostgreSQL, Redis, and SMTP",
+      "TypeORM-backed models enforce nodes, tasks, and memberships",
+      "Redis fan-out and diagnostics endpoints support live operations",
     ],
-    sideTitle: "Orchestration Power",
+    sideTitle: "Policy Enforcement",
     sideBody:
-      "This is where team-targeted runs map down into localized node-tasks and audit records are perfectly synthesized.",
-    tags: ["TypeORM mappings", "Redis backend", "Event-driven"],
+      "This is where root-profile gates, rollout eligibility, notification rules, and workspace permissions are checked before anything reaches a node.",
+    tags: ["Installer-managed", "Audit + alerts", "Redis-backed"],
   },
   {
     id: "agent",
     label: "Node Agent",
     icon: ServerCog,
-    title: "Go-lang Native Node Runtime",
+    title: "Go Agent Runtime",
     summary:
-      "A long-running, fault-tolerant Go binary deployed onto fleets, responsible for bootstrapping nodes securely, pulling updates natively, and pushing active telemetry.",
+      "The Linux agent handles bootstrap, telemetry, task execution, browser terminals, self-update, and root profile reconciliation on the host.",
     bullets: [
-      "Self-contained zero-dependency binaries",
-      "Internal metrics and terminal connection multiplexing",
-      "Hardware and OS version telemetry parsing",
+      "One-click install script for Ubuntu and Debian hosts",
+      "HTTP task claiming plus realtime terminal and telemetry handling",
+      "Version, platform, kernel, and root-profile state reporting",
     ],
-    sideTitle: "Execution Safety",
+    sideTitle: "Host Execution",
     sideBody:
-      "Updates, shell tasks, and package deployments go through exactly one standardized, auditable execution path.",
-    tags: ["Go Binary", "Zero-dependency", "Secure Self-Update"],
+      "Tasks, package operations, updates, and terminals travel through the same execution runtime, which keeps host-side behavior easier to audit.",
+    tags: ["Go binary", "Bootstrap install", "Profile sync"],
   },
   {
     id: "coordination",
-    label: "Coordinations",
+    label: "Realtime Mesh",
     icon: RadioTower,
-    title: "Omni-directional State Sync",
+    title: "Redis + Socket.IO Coordination",
     summary:
-      "A complete synchronization layer that bridges the web UI, orchestration API, and individual agents simultaneously across Redis and WebSockets.",
+      "Dedicated /realtime and /terminal channels bridge the web UI, API, and agents without relying on coarse page refreshes.",
     bullets: [
-      "Targeted Socket.IO isolated namespaces",
-      "Live terminal transcript broadcast and tracking",
-      "Immediate UI update dispatch across operator devices",
+      "Targeted Socket.IO namespaces for operators and terminal controllers",
+      "Transcript fan-out, reattach grace, and live install progress updates",
+      "Cross-instance Redis pub/sub keeps the UI coherent",
     ],
-    sideTitle: "Instant Operator Intel",
+    sideTitle: "Operator Coherency",
     sideBody:
-      "Operators experience live updates across every agent connection, upgrade task, or pipeline disruption without needing to hit reload once.",
-    tags: ["Live Fan-Out", "WebSocket Routing", "Redis Cache"],
+      "The coordination layer is what makes node onboarding, dashboards, task detail, rollout state, and live terminals feel like one product instead of separate tabs.",
+    tags: ["Socket.IO namespaces", "Transcript fan-out", "Redis pub/sub"],
   },
 ] as const;
 
@@ -118,7 +117,9 @@ export function RuntimeArchitecture() {
               <GradientText className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-primary">runtime responsibilities</GradientText>
             </h2>
             <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
-              Noderax splits operations seamlessly across web, API, agent, and realtime layers. We architected it so your data and commands travel safely and beautifully.
+              Noderax splits work across web, API, agent, and realtime layers
+              so setup, execution, alerting, and updates share one consistent
+              runtime story.
             </p>
           </div>
         </ScrollReveal>

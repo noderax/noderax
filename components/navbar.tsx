@@ -8,7 +8,7 @@ import {
   DisclosurePanel,
   Transition,
 } from "@headlessui/react";
-import { ChevronRight, Menu, X } from "lucide-react";
+import { ExternalLink, Menu, X } from "lucide-react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -19,6 +19,7 @@ const navLinks = [
   { label: "Surface", href: "#surface" },
   { label: "Architecture", href: "#architecture" },
   { label: "Operations", href: "#operations" },
+  { label: "Pricing", href: "#pricing" },
   { label: "Governance", href: "#governance" },
   { label: "FAQ", href: "#faq" },
 ];
@@ -48,8 +49,8 @@ export function Navbar() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         >
-          <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5 lg:px-8">
-            <a href="#" className="group flex items-center gap-3">
+          <nav className="mx-auto grid max-w-[94rem] grid-cols-[auto_1fr_auto] items-center gap-4 px-4 py-3.5 sm:px-6 lg:px-8">
+            <a href="#" className="group flex items-center gap-3 pr-2">
               <div className="relative h-14 w-14 overflow-hidden rounded-xl border border-primary/20 bg-primary/5 shadow-inner transition-transform group-hover:scale-105">
                 <Image
                   src="/logo.webp"
@@ -76,44 +77,50 @@ export function Navbar() {
               </div>
             </a>
 
-            <div className="hidden items-center gap-1.5 md:flex rounded-full border border-border/40 bg-card/40 p-1.5 shadow-sm backdrop-blur-md">
+            <div className="hidden min-w-0 justify-center lg:flex">
+              <div className="flex items-center gap-1.5 rounded-full border border-border/40 bg-card/46 px-2 py-1.5 shadow-sm backdrop-blur-md">
               {navLinks.map((link) => (
                 <a
                   key={link.href}
                   href={link.href}
-                  className="relative rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground transition-all hover:text-foreground hover:bg-background/80"
+                    className="relative rounded-full px-4 py-2 text-[15px] font-medium text-muted-foreground transition-all hover:bg-background/80 hover:text-foreground xl:px-5"
                 >
                   {link.label}
                 </a>
               ))}
+              </div>
             </div>
 
-            <div className="hidden items-center gap-3 md:flex">
+            <div className="hidden items-center justify-end gap-2.5 lg:flex">
               <ThemeToggle />
-              <div className="h-4 w-px bg-border/60" />
-              <SystemStatus placement="bottom" />
+              <div className="h-4 w-px bg-border/60 lg:h-5" />
+              <div className="hidden xl:block">
+                <SystemStatus placement="bottom" />
+              </div>
               <a
                 href="#architecture"
                 className={cn(
                   buttonVariants({ variant: "ghost", size: "sm" }),
-                  "font-medium",
+                  "px-4 font-medium text-muted-foreground hover:text-foreground",
                 )}
               >
                 View Architecture
               </a>
               <a
-                href="#cta"
+                href="https://github.com/noderax"
+                target="_blank"
+                rel="noreferrer"
                 className={cn(
                   buttonVariants({ size: "sm" }),
-                  "group rounded-full shadow-md",
+                  "group rounded-full px-5 shadow-md",
                 )}
               >
-                Dashboard
-                <ChevronRight className="ml-1 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                Open GitHub
+                <ExternalLink className="ml-1 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
               </a>
             </div>
 
-            <div className="flex items-center gap-3 md:hidden">
+            <div className="col-start-3 flex items-center justify-end gap-3 lg:hidden">
               <ThemeToggle />
               <DisclosureButton
                 className="flex h-10 w-10 items-center justify-center rounded-xl border border-border/50 bg-background/80 text-foreground shadow-sm backdrop-blur transition-colors hover:bg-muted"
@@ -165,14 +172,16 @@ export function Navbar() {
                   View Architecture
                 </a>
                 <a
-                  href="#cta"
+                  href="https://github.com/noderax"
+                  target="_blank"
+                  rel="noreferrer"
                   onClick={() => close()}
                   className={cn(
                     buttonVariants({ size: "default" }),
                     "h-11 rounded-xl shadow-md",
                   )}
                 >
-                  Dashboard Console
+                  Open GitHub
                 </a>
               </div>
 

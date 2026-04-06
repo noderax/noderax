@@ -20,9 +20,9 @@ const footerLinks = {
     },
   ],
   Details: [
-    { label: "Pricing", href: "#pricing" },
+    { label: "Deployment paths", href: "#pricing" },
     { label: "Technical FAQ", href: "#faq" },
-    { label: "Deploy Dashboard", href: "#cta" },
+    { label: "Setup & rollouts", href: "#operations" },
   ],
 };
 
@@ -63,9 +63,9 @@ export function Footer() {
             </a>
 
             <p className="mt-6 text-sm leading-relaxed text-muted-foreground">
-              A meticulously engineered infrastructure management suite
-              featuring a workspace-aware web UI, robust orchestration, secure
-              Go agents, and native persistent telemetry mapping.
+              A workspace-aware control plane for Linux operations with browser
+              terminals, task execution, notification routing, audit history,
+              and official agent release orchestration.
             </p>
           </div>
 

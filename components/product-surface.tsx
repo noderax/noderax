@@ -1,15 +1,14 @@
 "use client";
 
 import {
+  ArrowUpCircle,
   BellRing,
   FolderKanban,
   KeyRound,
   MonitorCog,
-  ScanSearch,
   TerminalSquare,
 } from "lucide-react";
 import { GradientText } from "@/components/ui/gradient-text";
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -22,68 +21,68 @@ import { ScrollReveal } from "@/components/ui/scroll-reveal";
 const productSurface = [
   {
     icon: KeyRound,
-    title: "Identity & Zero-Trust Base",
+    title: "Identity & Access",
     description:
-      "Global user identities wired for password login, MFA, and OIDC-based SSO. Strict access policies handled effortlessly.",
+      "Invite-first users, password login, TOTP MFA, and OIDC-based SSO live in the same control plane.",
     bullets: [
-      "Platform admin & workspace scopes",
-      "Robust state enforcement for inactivity",
-      "Seamless browser auth & routing",
+      "Platform admin plus workspace owner/admin/member/viewer roles",
+      "Public auth lifecycle for invites, password reset, and MFA challenge",
+      "Unified account and platform identity settings",
     ],
   },
   {
     icon: FolderKanban,
-    title: "Workspace Modeling",
+    title: "Workspace & Team Model",
     description:
-      "Complete organizational mapping with teams, node ownership, deep search capabilities, and precise data isolation.",
+      "Workspaces, members, teams, default-workspace fallback, archived read-only mode, and unified search are already wired in.",
     bullets: [
-      "Granular team node segregation",
-      "Unified operational search",
-      "Secure data archiving workflows",
+      "Team-targeted task and schedule expansion",
+      "Search across nodes, tasks, schedules, events, members, and teams",
+      "Archived workspaces stay readable while mutations pause",
     ],
   },
   {
     icon: MonitorCog,
-    title: "Fleet Node Inventory",
+    title: "Node Onboarding & Inventory",
     description:
-      "Observe every Linux node via self-reporting status metrics, version data, maintenance signals, and deep platform inspection.",
+      "Two-step add-node onboarding gives you short-lived bootstrap commands, live install progress, and Linux inventory with telemetry.",
     bullets: [
-      "Instant offline/online tracking",
-      "One-click installs with live polling",
-      "Dynamic node bootstrap rendering",
+      "One-click agent install command generation",
+      "Node version, platform, and kernel visibility",
+      "Maintenance mode and online or offline state tracking",
     ],
   },
   {
     icon: TerminalSquare,
-    title: "Persistent Control Plane",
+    title: "Execution & Terminals",
     description:
-      "A shared execution layer handles instantaneous shell commands, long-running agent updates, and dynamic task scheduling.",
+      "Shell tasks, schedules, package actions, and browser terminals share a guarded execution model instead of separate tools.",
     bullets: [
-      "Queued to deployed state transitions",
-      "Seamless node-level API expansion",
-      "Interactive session reattach windows",
+      "5-minute terminal reattach window after leaving the page",
+      "7-day transcript retention with timeline replay",
+      "Root-aware package, task, schedule, and terminal controls",
     ],
   },
   {
     icon: BellRing,
-    title: "Infallible Audit Trails",
+    title: "Notifications & Audit",
     description:
-      "Append-only operational logs mixed with dynamic workspace notification fan-out loops guaranteeing high visibility into system mutations.",
+      "Workspace Email and Telegram automations, node-level delivery overrides, and audit views keep operators informed without extra plumbing.",
     bullets: [
-      "Event-driven Telegram & Email alerts",
-      "Automatic high CPU threshold alarms",
-      "Read-only cryptographic compliance",
+      "Severity-based Email and Telegram filters",
+      "Per-node rules for node-scoped event delivery",
+      "Platform and workspace audit history for admin changes",
     ],
   },
   {
-    icon: ScanSearch,
-    title: "Intelligent Rollouts",
+    icon: ArrowUpCircle,
+    title: "Agent Release Control",
     description:
-      "Sequential agent dispatch built over real-time WebSockets allows progressive software updates monitored across a live dashboard.",
+      "Official tagged agent releases flow into an updates center with sequential rollouts and recovery controls.",
     bullets: [
-      "Redis + Socket.IO immediate fan-out",
-      "Continuous verification deployments",
-      "Full first-run installation management",
+      "Release notes resolved from the agent changelog",
+      "Retry, skip, resume, cancel, and rollback actions",
+      "Version-aware node eligibility and maintenance gating",
     ],
   },
 ];
@@ -100,10 +99,16 @@ export function ProductSurface() {
               Product Overview
             </div>
             <h2 className="mt-2 text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl text-foreground">
-              Built for <GradientText className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-primary">Day-0 through Day-2</GradientText> operations
+              Built for{" "}
+              <GradientText className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-primary">
+                Day-0 through Day-2
+              </GradientText>{" "}
+              operations
             </h2>
             <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
-              Everything required to orchestrate vast systems: real-time live polling, secure authentication tunnels, extensive fleet logs, and native rollout procedures fully abstracted.
+              What operators can do today: onboard nodes, scope privilege, tune
+              alert delivery, inspect audits, and ship official agent releases
+              from one web surface.
             </p>
           </div>
         </ScrollReveal>

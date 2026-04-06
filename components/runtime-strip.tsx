@@ -8,40 +8,45 @@ import {
   ShieldCheck,
   Workflow,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 
 const stack = [
   {
     icon: AppWindowMac,
-    title: "Next.js 16 Web Engine",
-    description: "Workspace-aware App Router interface utilizing route handlers and zero-trust proxy endpoints natively.",
+    title: "Next.js 16 Operator Surface",
+    description:
+      "Workspace-aware App Router UI with auth handlers, proxy routes, and dedicated terminal attachment flows.",
   },
   {
     icon: Workflow,
-    title: "NestJS Core API",
-    description: "Drives all internal logic: team targets, node authentication, cron execution, and event processing.",
+    title: "NestJS Orchestration API",
+    description:
+      "Installer-managed setup, scheduling, audit logging, notifications, and rollout orchestration live here.",
   },
   {
     icon: Server,
-    title: "Go-lang Fleet Agents",
-    description: "Ultra-lightweight binaries managing enrollment, socket streaming, and interactive task handling.",
+    title: "Go Fleet Agents",
+    description:
+      "Linux daemons handle bootstrap, telemetry, long-poll task claiming, realtime terminals, and self-update.",
   },
   {
     icon: Database,
-    title: "Hybrid Data Persistence",
-    description: "PostgreSQL ensures durable transactional history alongside Redis for instantaneous pub/sub event routing.",
+    title: "PostgreSQL + Redis",
+    description:
+      "Durable control-plane history and reconnect-aware pub/sub fan-out back the operational state model.",
   },
   {
     icon: Radio,
-    title: "Bi-directional WebSockets",
-    description: "Immediate namespace propagation across /realtime and /terminal streams with reattach grace windows.",
+    title: "Realtime + Terminal Channels",
+    description:
+      "Dedicated /realtime and /terminal namespaces keep installs, metrics, tasks, and shell sessions current.",
   },
   {
     icon: ShieldCheck,
-    title: "Implicit Global Security",
-    description: "Invite-first provisioning gated tightly via OIDC SSO, Multi-Factor schemas, and cryptographic audits.",
+    title: "Policy Gates",
+    description:
+      "Invite-first access, MFA, OIDC, workspace RBAC, and per-node root profile gating enforce operator boundaries.",
   },
 ];
 
@@ -59,10 +64,13 @@ export function RuntimeStrip() {
                 Architecture Blueprint
               </div>
               <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-                Built upon an uncompromising foundation.
+                Grounded in the runtime boundaries the product actually ships.
               </h2>
               <p className="mt-4 text-base leading-relaxed text-muted-foreground/90">
-                Noderax eschews superficial dashboards for a genuinely powerful multi-runtime core. The stack isolates responsibilities flawlessly, ensuring unparalleled performance across tens of thousands of fleet nodes instantly.
+                Noderax is not a generic dashboard skin. The web surface, API,
+                agents, persistence layer, and policy gates are separated so
+                onboarding, execution, notifications, and rollouts stay coherent
+                as the product grows.
               </p>
             </div>
           </div>

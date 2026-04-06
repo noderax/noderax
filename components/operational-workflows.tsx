@@ -2,10 +2,10 @@
 
 import { Progress } from "@base-ui/react/progress";
 import {
-  ActivitySquare,
   ArrowRightLeft,
   PackageCheck,
   ScanLine,
+  ShieldCheck,
 } from "lucide-react";
 import { GradientText } from "@/components/ui/gradient-text";
 import { Badge } from "@/components/ui/badge";
@@ -21,39 +21,54 @@ import { ScrollReveal } from "@/components/ui/scroll-reveal";
 const workflows = [
   {
     icon: ScanLine,
-    title: "One-Click Bootstrapping",
+    title: "Installer-Managed Setup",
     description:
-      "A generated workspace-scoped installation configures PostgreSQL, Redis, and SMTP instantly, streaming live bootstrap visibility direct to the console.",
-    phases: ["Setup Core", "Generate Auth", "Live Bootstrap", "Node Ready"],
+      "Validate PostgreSQL, Redis, and optional SMTP, then persist runtime settings with restart-aware platform controls.",
+    phases: [
+      "Validate services",
+      "Write install state",
+      "Apply runtime config",
+      "Restart safely",
+    ],
     progress: 100,
-    status: "Day-0 to Day-1",
+    status: "Platform bootstrap",
   },
   {
     icon: ArrowRightLeft,
-    title: "Unified Execution Pipeline",
+    title: "Add-Node Onboarding",
     description:
-      "Everything shares one abstraction: shell commands, packages, updates. The orchestration engine dynamically tracks claims, logs, logic gates, and outputs natively.",
-    phases: ["Queue Sync", "Agent Claim", "Process Run", "Finalized Output"],
-    progress: 82,
-    status: "Omni-directional Control",
+      "Generate a short-lived bootstrap command, run it on the host, and watch install progress stream back into the workspace.",
+    phases: [
+      "Create install token",
+      "Run one-click script",
+      "Consume bootstrap",
+      "Node enrolled",
+    ],
+    progress: 88,
+    status: "Workspace onboarding",
   },
   {
-    icon: ActivitySquare,
-    title: "Real-time Telemetry & SSH",
+    icon: ShieldCheck,
+    title: "Guarded Execution Surfaces",
     description:
-      "Telemetry pours through instantly. A highly persistent, dynamically reattaching interactive terminal streams bidirectional WebSocket packets natively.",
-    phases: ["Metrics Pull", "Event Stream", "Socket Attach", "Grace Window"],
-    progress: 94,
-    status: "Zero-latency visibility",
+      "Operational actions, shell tasks, scheduled tasks, and browser terminals unlock only after the applied root profile grants that surface.",
+    phases: ["Choose profile", "Agent sync", "Applied profile", "Run action"],
+    progress: 93,
+    status: "Least privilege",
   },
   {
     icon: PackageCheck,
-    title: "Orchestrated Rollouts",
+    title: "Official Agent Rollouts",
     description:
-      "Updates push automatically into a sequential rollout plan. A complete tag-based discovery protocol upgrades hundreds of agents asynchronously without downtime.",
-    phases: ["Tag Discovery", "Mapping", "Sequential Deploy", "Audit Verification"],
-    progress: 74,
-    status: "Hands-free lifecycle",
+      "Tagged releases appear in Updates with sequential deployment, eligibility checks, and retry/skip/resume/cancel/rollback controls.",
+    phases: [
+      "Discover release",
+      "Select nodes",
+      "Sequential rollout",
+      "Heartbeat confirm",
+    ],
+    progress: 79,
+    status: "Fleet lifecycle",
   },
 ];
 
@@ -73,7 +88,9 @@ export function OperationalWorkflows() {
               <GradientText className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-primary">execute natively</GradientText>
             </h2>
             <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
-              Every scattered script, side utility, and manual process is unified. Core metrics, automated software deployments, and interactive terminals run out-of-the-box natively.
+              The current product already covers platform setup, node
+              onboarding, guarded execution, and official agent release
+              management without inventing side consoles.
             </p>
           </div>
         </ScrollReveal>

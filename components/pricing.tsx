@@ -1,6 +1,13 @@
 "use client";
 
-import { Check, Minus, ArrowRight, Sparkles } from "lucide-react";
+import {
+  CheckCircle2,
+  Cloud,
+  ExternalLink,
+  ServerCog,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { GradientText } from "@/components/ui/gradient-text";
 import { motion } from "motion/react";
@@ -8,60 +15,52 @@ import { cn } from "@/lib/utils";
 
 const plans = [
   {
-    name: "Starter",
-    description: "Perfect for exploratory rollouts",
-    price: "Free",
-    period: "",
-    cta: "Deploy Starter",
-    featured: false,
-    features: [
-      { text: "Up to 5 synced nodes", included: true },
-      { text: "1 logical workspace", included: true },
-      { text: "Basic orchestration", included: true },
-      { text: "Real-time telemetry", included: true },
-      { text: "Community forums", included: true },
-      { text: "Persistent terminal", included: false },
-      { text: "OIDC & SSO Integrations", included: false },
-      { text: "Cryptographic auditing", included: false },
-    ],
-  },
-  {
-    name: "Pro Fleet",
-    description: "For sprawling networks that demand scale",
-    price: "$29",
-    period: "/node/mo",
-    cta: "Start Pro Trial",
+    name: "Self Hosted",
+    icon: ServerCog,
+    description:
+      "Run Noderax on your own infrastructure and adopt the control plane at your own pace.",
+    badge: "Available",
+    cta: "Open GitHub",
+    href: "https://github.com/noderax",
     featured: true,
-    features: [
-      { text: "Unlimited node limits", included: true },
-      { text: "Unlimited workspaces", included: true },
-      { text: "Advanced pipelines", included: true },
-      { text: "Historical metric parsing", included: true },
-      { text: "Priority SLA support", included: true },
-      { text: "Persistent terminal", included: true },
-      { text: "OIDC & SSO Integrations", included: true },
-      { text: "Cryptographic auditing", included: false },
+    comingSoon: false,
+    highlights: [
+      "Installer-managed setup with PostgreSQL, Redis, and optional SMTP validation.",
+      "Workspace-aware control plane, browser terminals, notifications, and official agent rollouts.",
+      "Best fit if you want to evaluate, deploy, and operate Noderax on your own hosts.",
     ],
   },
   {
-    name: "Enterprise Core",
-    description: "Air-gapped clusters mapping full power",
-    price: "Custom",
-    period: "",
-    cta: "Contact Engineers",
+    name: "Cloud",
+    icon: Cloud,
+    description:
+      "Managed Noderax control plane for teams that want the product without owning the platform runtime.",
+    cta: "Coming Soon",
+    href: null,
     featured: false,
-    features: [
-      { text: "Global multi-tenant plane", included: true },
-      { text: "Self-hosted & on-prem", included: true },
-      { text: "Sequential agent updates", included: true },
-      { text: "Exportable metric lakes", included: true },
-      { text: "Dedicated success rep", included: true },
-      { text: "Persistent terminal", included: true },
-      { text: "OIDC / SSO / YubiKey MFA", included: true },
-      { text: "Granular audit logs", included: true },
+    comingSoon: true,
+    highlights: [
+      "Hosted control plane experience without maintaining the web and API stack yourself.",
+      "Same operator workflows, rollout visibility, and workspace-aware fleet operations.",
+      "Useful when you want faster onboarding and less infrastructure ownership.",
     ],
   },
-];
+  {
+    name: "Enterprise",
+    icon: ShieldCheck,
+    description:
+      "Expanded commercial offering for larger organizations with stricter rollout, governance, and support expectations.",
+    cta: "Coming Soon",
+    href: null,
+    featured: false,
+    comingSoon: true,
+    highlights: [
+      "Designed for teams that need stronger procurement, governance, and operating assurances.",
+      "Intended to build on the same control plane foundations rather than a separate product line.",
+      "Will sit above the self-hosted core once the commercial path is ready.",
+    ],
+  },
+] as const;
 
 export function Pricing() {
   return (
@@ -72,14 +71,18 @@ export function Pricing() {
         <ScrollReveal>
           <div className="mx-auto max-w-3xl text-center mb-20">
             <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary shadow-sm backdrop-blur-md mb-6">
-              Flexible Tiers
+              Pricing & Availability
             </div>
-            <h2 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-5xl">
-              Scale your fleet without {" "}
-              <GradientText className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-primary">architectural limits</GradientText>
+            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-4xl">
+              Choose how you want to{" "}
+              <GradientText className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-primary">
+                run Noderax
+              </GradientText>
             </h2>
-            <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
-              Everything required to orchestrate vast systems. Begin testing locally, and roll out seamlessly once you're comfortable. Absolute transparency.
+            <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-lg">
+              Self-hosted is available today. Cloud and Enterprise are shown
+              explicitly as planned options instead of pretending they already
+              exist.
             </p>
           </div>
         </ScrollReveal>
@@ -97,7 +100,6 @@ export function Pricing() {
                     : "border-border/50 bg-card/50 hover:bg-card/70 hover:shadow-xl hover:border-primary/20 hover:shadow-primary/5"
                 )}
               >
-                {/* Featured background glow effect */}
                 {plan.featured && (
                   <>
                     <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-50" />
@@ -105,74 +107,59 @@ export function Pricing() {
                   </>
                 )}
 
-                {/* Featured badge */}
                 {plan.featured && (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
                     <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary shadow-lg shadow-primary/30 px-5 py-1 text-[11px] font-black uppercase tracking-[0.1em] text-primary-foreground">
                       <Sparkles className="h-3 w-3" />
-                      Definitive Choice
+                      {plan.badge}
                     </div>
                   </div>
                 )}
 
-                {/* Header */}
                 <div className="relative z-10 mb-8">
-                  <h3 className={cn("text-2xl font-bold tracking-tight", plan.featured ? "text-primary" : "text-foreground")}>
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary shadow-inner">
+                    <plan.icon className="h-5 w-5" />
+                  </div>
+                  <h3 className={cn("text-xl font-bold tracking-tight sm:text-2xl", plan.featured ? "text-primary" : "text-foreground")}>
                     {plan.name}
                   </h3>
-                  <p className="mt-2 text-[15px] leading-snug text-muted-foreground/90">
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground/90">
                     {plan.description}
                   </p>
                 </div>
 
-                {/* Price */}
-                <div className="relative z-10 mb-8 flex items-baseline gap-1.5">
-                  <span className="text-5xl font-extrabold tracking-tight text-foreground">
-                    {plan.price}
-                  </span>
-                  {plan.period && (
-                    <span className="text-[15px] font-medium text-muted-foreground">
-                      {plan.period}
-                    </span>
-                  )}
-                </div>
+                {plan.href ? (
+                  <a
+                    href={plan.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={cn(
+                      "relative z-10 mb-10 flex min-h-[52px] items-center justify-center gap-2 rounded-2xl text-[15px] font-bold transition-all duration-300",
+                      plan.featured
+                        ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5"
+                        : "border border-border/70 bg-background/50 text-foreground hover:bg-primary/5 hover:border-primary/30 hover:text-primary"
+                    )}
+                  >
+                    {plan.cta}
+                    <ExternalLink className="h-4 w-4" />
+                  </a>
+                ) : (
+                  <div className="relative z-10 mb-10 flex min-h-[52px] items-center justify-center rounded-2xl border border-dashed border-border/70 bg-background/35 text-sm font-bold text-muted-foreground sm:text-[15px]">
+                    {plan.cta}
+                  </div>
+                )}
 
-                {/* CTA */}
-                <a
-                  href="#"
-                  className={cn(
-                    "relative z-10 mb-10 flex min-h-[52px] items-center justify-center gap-2 rounded-2xl text-[15px] font-bold transition-all duration-300",
-                    plan.featured
-                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5"
-                      : "border border-border/70 bg-background/50 text-foreground hover:bg-primary/5 hover:border-primary/30 hover:text-primary"
-                  )}
-                >
-                  {plan.cta}
-                  <ArrowRight className="h-4 w-4" />
-                </a>
-
-                {/* Features */}
                 <div className="relative z-10 mt-auto flex flex-col gap-4">
-                  {plan.features.map((feature) => (
+                  {plan.highlights.map((highlight) => (
                     <div
-                      key={feature.text}
+                      key={highlight}
                       className="flex items-center gap-3.5"
                     >
-                      <div className={cn("flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-colors", feature.included ? (plan.featured ? "border-primary/30 bg-primary/10 text-primary" : "border-primary/20 bg-primary/5 text-primary/80") : "border-transparent bg-transparent text-muted-foreground/40")}>
-                        {feature.included ? (
-                          <Check className="h-3.5 w-3.5" />
-                        ) : (
-                          <Minus className="h-3.5 w-3.5" />
-                        )}
+                      <div className={cn("flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-colors", plan.featured ? "border-primary/30 bg-primary/10 text-primary" : "border-primary/20 bg-primary/5 text-primary/80")}>
+                        <CheckCircle2 className="h-3.5 w-3.5" />
                       </div>
-                      <span
-                        className={cn("text-sm font-medium",
-                          feature.included
-                            ? "text-foreground/90"
-                            : "text-muted-foreground/50"
-                        )}
-                      >
-                        {feature.text}
+                      <span className="text-[13px] leading-relaxed font-medium text-foreground/90 sm:text-sm">
+                        {highlight}
                       </span>
                     </div>
                   ))}

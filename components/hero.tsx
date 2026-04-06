@@ -3,9 +3,9 @@
 import { motion, useReducedMotion, type Variants } from "motion/react";
 import {
   ArrowRight,
-  FolderTree,
-  Radio,
-  TerminalSquare,
+  ArrowUpCircle,
+  BellRing,
+  ShieldCheck,
   Sparkles,
 } from "lucide-react";
 import { HeroArchitecture } from "@/components/hero-architecture";
@@ -40,20 +40,53 @@ const itemVariants: Variants = {
 
 const summaryCards = [
   {
-    icon: FolderTree,
-    title: "Workspace-Aware",
-    body: "Unified search, localized teams, and zero-trust RBAC by default.",
+    icon: ShieldCheck,
+    title: "Scoped Root Profiles",
+    body: "Per-node operational, task, and terminal scopes with desired/applied sync visibility.",
   },
   {
-    icon: TerminalSquare,
-    title: "Interactive Terminals",
-    body: "Persistent chunk logs and grace windows built precisely into the UI.",
+    icon: BellRing,
+    title: "Node Delivery Rules",
+    body: "Workspace Email and Telegram automations with node-level severity overrides.",
   },
   {
-    icon: Radio,
-    title: "Realtime Telemetry",
-    body: "Redis-backed fan-out. Seamless Socket.IO state streaming.",
+    icon: ArrowUpCircle,
+    title: "Official Rollouts",
+    body: "Tagged agent releases, monitored rollout steps, and retry or rollback controls.",
   },
+];
+
+const orbitRings = [
+  {
+    size: "h-[18rem] w-[18rem] sm:h-[23rem] sm:w-[23rem]",
+    border: "border-primary/15",
+    dotClass:
+      "bg-primary shadow-[0_0_18px_rgba(239,68,68,0.55)] dark:shadow-[0_0_18px_rgba(239,68,68,0.42)]",
+    duration: 24,
+    rotation: 360,
+  },
+  {
+    size: "h-[26rem] w-[26rem] sm:h-[34rem] sm:w-[34rem]",
+    border: "border-orange-400/12",
+    dotClass:
+      "bg-orange-400 shadow-[0_0_18px_rgba(251,146,60,0.45)] dark:shadow-[0_0_18px_rgba(251,146,60,0.34)]",
+    duration: 34,
+    rotation: -360,
+  },
+  {
+    size: "h-[34rem] w-[34rem] sm:h-[44rem] sm:w-[44rem]",
+    border: "border-foreground/6",
+    dotClass:
+      "bg-white/80 shadow-[0_0_14px_rgba(255,255,255,0.28)] dark:bg-white/55 dark:shadow-[0_0_14px_rgba(255,255,255,0.18)]",
+    duration: 46,
+    rotation: 360,
+  },
+] as const;
+
+const heroHighlights = [
+  "5-minute terminal reattach",
+  "7-day transcript retention",
+  "Email + Telegram routing",
 ];
 
 export function Hero() {
@@ -61,21 +94,73 @@ export function Hero() {
 
   return (
     <section className="relative overflow-hidden pt-28 pb-20 lg:pt-36 lg:pb-24">
-      {/* Animated UI Accents - Floating depth elements */}
       <div className="absolute inset-0 z-[-1] pointer-events-none">
-        <motion.div 
-          className="absolute top-[10%] left-[5%] h-[400px] w-[400px] rounded-full bg-primary/5 blur-[120px]"
-          animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3] }}
+        <div className="absolute left-1/2 top-[18%] -translate-x-1/2 -translate-y-1/2">
+          {orbitRings.map((ring) => (
+            <motion.div
+              key={ring.size}
+              className={cn(
+                "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border",
+                ring.size,
+                ring.border,
+              )}
+              animate={
+                shouldReduceMotion
+                  ? undefined
+                  : {
+                      rotate: ring.rotation,
+                      scale: [1, 1.025, 1],
+                    }
+              }
+              transition={{
+                duration: ring.duration,
+                repeat: Infinity,
+                ease: "linear",
+              }}
+            >
+              <div
+                className={cn(
+                  "absolute left-1/2 top-0 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full",
+                  ring.dotClass,
+                )}
+              />
+            </motion.div>
+          ))}
+        </div>
+
+        <motion.div
+          className="absolute top-[10%] left-[5%] h-[400px] w-[400px] rounded-full bg-primary/6 blur-[120px]"
+          animate={
+            shouldReduceMotion
+              ? undefined
+              : { scale: [1, 1.08, 1], opacity: [0.28, 0.46, 0.28] }
+          }
           transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
         />
-        <motion.div 
-          className="absolute bottom-[10%] right-[0%] h-[500px] w-[500px] rounded-full bg-orange-500/5 blur-[150px]"
-          animate={{ scale: [1.1, 1, 1.1], opacity: [0.2, 0.4, 0.2] }}
+        <motion.div
+          className="absolute bottom-[10%] right-[0%] h-[500px] w-[500px] rounded-full bg-orange-500/6 blur-[150px]"
+          animate={
+            shouldReduceMotion
+              ? undefined
+              : { scale: [1.08, 1, 1.08], opacity: [0.22, 0.36, 0.22] }
+          }
           transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute inset-x-[-10%] top-[47%] h-px bg-gradient-to-r from-transparent via-primary/25 to-transparent"
+          animate={
+            shouldReduceMotion
+              ? undefined
+              : {
+                  x: ["-6%", "6%", "-6%"],
+                  opacity: [0.18, 0.55, 0.18],
+                }
+          }
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
         />
       </div>
 
-      <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
+      <div className="relative mx-auto max-w-[84rem] px-6 lg:px-8">
         <motion.div
           className="flex flex-col items-center text-center"
           initial={shouldReduceMotion ? false : "hidden"}
@@ -93,7 +178,7 @@ export function Hero() {
                 <div className="absolute inset-y-0 left-[-35%] w-1/3 -skew-x-12 bg-white/15 opacity-0 blur-md transition-all duration-700 group-hover:left-[110%] group-hover:opacity-100 dark:bg-white/10" />
                 <Sparkles className="relative mr-2 h-4 w-4 transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110" />
                 <span className="relative tracking-[0.01em]">
-                  Next Generation Infrastructure Control
+                  One surface. Every Linux move.
                 </span>
               </div>
             </motion.div>
@@ -103,10 +188,10 @@ export function Hero() {
             variants={itemVariants}
             className="mt-8 max-w-4xl text-5xl font-extrabold leading-[1.1] tracking-tight sm:text-6xl lg:text-7xl"
           >
-            Operate Linux fleets through{" "}
+            Operate Linux fleets with{" "}
             <br className="hidden lg:block" />
             <GradientText className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-orange-500 to-primary/80">
-              one coordinated runtime
+              scoped privilege and live runtime control
             </GradientText>
           </motion.h1>
 
@@ -114,7 +199,11 @@ export function Hero() {
             variants={itemVariants}
             className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl"
           >
-            Noderax combines a Next.js operator surface, a NestJS orchestration API, and a Go agent so teams can stream telemetry, exact terminal sessions, and orchestrate updates entirely from the web.
+            Noderax combines a Next.js operator surface, a NestJS orchestration
+            API, and a Go agent so teams can install nodes, stream telemetry,
+            open browser terminals, tune Email and Telegram delivery, and roll
+            out official tagged agent releases from one workspace-aware control
+            plane.
           </motion.p>
 
           <motion.div
@@ -129,7 +218,7 @@ export function Hero() {
               )}
             >
               <div className="absolute inset-0 bg-white/20 opacity-0 transition-opacity group-hover:opacity-100 dark:bg-white/10" />
-              Explore Product Surface
+              Inspect Product Surface
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </a>
             <a
@@ -139,13 +228,27 @@ export function Hero() {
                 "rounded-full bg-background/50 backdrop-blur-md transition-colors hover:bg-background/80"
               )}
             >
-              See Architecture Diagram
+              View Runtime Topology
             </a>
+          </motion.div>
+
+          <motion.div
+            variants={itemVariants}
+            className="mt-6 flex flex-wrap items-center justify-center gap-3"
+          >
+            {heroHighlights.map((highlight) => (
+              <div
+                key={highlight}
+                className="rounded-full border border-border/60 bg-background/55 px-4 py-2 text-sm font-medium text-muted-foreground shadow-sm backdrop-blur-md"
+              >
+                {highlight}
+              </div>
+            ))}
           </motion.div>
         </motion.div>
 
         <motion.div
-          className="mt-16 grid gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center"
+          className="mt-16 space-y-8"
           initial={shouldReduceMotion ? false : "hidden"}
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
@@ -160,10 +263,10 @@ export function Hero() {
             </div>
           </motion.div>
 
-          <div className="flex flex-col justify-center space-y-6">
+          <div className="grid gap-6 lg:grid-cols-3">
             {summaryCards.map((card) => (
               <motion.div key={card.title} variants={itemVariants}>
-                <Card className="surface-hover group relative overflow-hidden border-border/50 bg-card/60 backdrop-blur-md transition-all hover:bg-card/80">
+                <Card className="surface-hover group relative h-full overflow-hidden border-border/50 bg-card/60 backdrop-blur-md transition-all hover:bg-card/80">
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                   <CardContent className="p-6">
                     <div className="flex items-center gap-5">

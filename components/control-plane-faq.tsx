@@ -7,7 +7,6 @@ import {
   Transition,
 } from "@headlessui/react";
 import { ChevronDown, MessageSquareText } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { GradientText } from "@/components/ui/gradient-text";
 import { Card } from "@/components/ui/card";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
@@ -15,34 +14,34 @@ import { cn } from "@/lib/utils";
 
 const items = [
   {
-    question: "How do operators effectively interact with the Core API?",
+    question: "How does the browser talk to the API?",
     answer:
-      "All explicit operational requests occur strictly through Next.js proxy route handlers, ensuring the raw back-end interface is entirely abstracted and hidden from end-user browsers. This creates a secure, single-pane web console.",
+      "The browser signs in through Next.js auth handlers, then uses proxy route handlers for authenticated REST traffic. Realtime state uses dedicated socket flows, so the public client does not need direct raw API plumbing for every surface.",
   },
   {
     question: "What is the onboarding process for new nodes?",
     answer:
-      "We emphasize one-click workspace-scoped deployments. A single generated script automatically acquires dependencies, registers the machine securely with the control plane, and establishes persistent WebSocket telemetry immediately.",
+      "Operators create a workspace-scoped install request first, then Noderax generates a short-lived one-click bootstrap command. While that script runs on the host, install progress streams back into the web UI until the node is enrolled.",
   },
   {
-    question: "Are isolated deployment tasks handled efficiently?",
+    question: "How is privileged access controlled on each node?",
     answer:
-      "Yes. Shell operations, package modifications, scheduled cron sets, and automated node updates execute via the very same foundational scheduling pipeline. Team-level targets automatically expand to map to all constituent nodes.",
+      "Each node has a root access profile with separate operational, task, and terminal surfaces, plus composite combinations. The UI and API wait for the applied profile before unlocking package actions, root tasks, or root terminals.",
   },
   {
-    question: "How does the platform maintain real-time coherency?",
+    question: "What notification channels exist today?",
     answer:
-      "A Redis pub/sub layer propagates events across instances, whilst dynamically isolated Socket.IO namespaces broadcast these precise state mutations immediately down to subscribed clients with zero aggressive polling.",
+      "Workspaces can route INFO, WARNING, and CRITICAL events through Email and Telegram. Node-specific rules can suppress node-scoped delivery by channel and severity, while critical event email preferences still allow admins to receive urgent alerts.",
   },
   {
-    question: "Is tenancy logically isolated, or purely superficial?",
+    question: "What happens if an operator leaves a live terminal session?",
     answer:
-      "Tenancy is mapped deeply at the transactional layer. Workspaces segment resources stringently: teams are localized, global administrators span realms, and archived operations mutate to a globally read-only state for cryptographic logging.",
+      "Leaving the page does not terminate the shell immediately. The session stays reattachable for five minutes, transcript chunks remain persisted for seven days, and the creator can return to the same session from the terminal history.",
   },
   {
-    question: "Are system-level agent rollouts managed via Noderax itself?",
+    question: "How are agent releases shipped across the fleet?",
     answer:
-      "Yes. The centralized operations hub coordinates native binary updates automatically. Registered node versions are compared asynchronously against the latest official releases to execute zero-downtime, sequential rollout loops.",
+      "The Updates center only surfaces official tagged releases, then walks eligible nodes through a sequential rollout plan. Operators can retry, skip, resume, cancel, or roll back targets while watching status converge in the same view.",
   },
 ];
 
