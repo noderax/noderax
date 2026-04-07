@@ -1,86 +1,88 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState, type HTMLAttributes } from "react";
+import { useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
-  Activity,
+  AlertTriangle,
   BellRing,
   Boxes,
-  CheckCircle2,
+  CircleCheckBig,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   CirclePlay,
-  Clock3,
+  ClipboardList,
+  Cpu,
+  ExternalLink,
   FolderTree,
+  HardDrive,
   LayoutDashboard,
+  MemoryStick,
   MonitorCog,
+  MoreVertical,
   RefreshCcw,
   Search,
   ServerCog,
   Settings,
   ShieldCheck,
-  TerminalSquare,
+  SquareTerminal,
+  Sun,
+  Thermometer,
+  UserRound,
+  Users,
   Users2,
+  WifiOff,
   Workflow,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type ViewKey = "dashboard" | "nodes" | "tasks" | "updates" | "settings";
+type ViewKey =
+  | "dashboard"
+  | "nodes"
+  | "tasks"
+  | "events"
+  | "members"
+  | "teams"
+  | "audit"
+  | "settings"
+  | "workspaces"
+  | "users"
+  | "updates"
+  | "platform-audit"
+  | "platform-settings";
 
-type DemoNode = {
-  id: string;
+type SidebarItem = {
+  key: ViewKey;
+  label: string;
+  icon: LucideIcon;
+};
+
+type TelemetryNode = {
   name: string;
-  hostname: string;
-  status: "online" | "degraded" | "maintenance";
-  cpu: number;
-  memory: number;
-  rootProfile: string;
-  terminal: string;
-  routes: string;
-  release: string;
+  host: string;
+  status: "online";
+  metrics: {
+    cpu: number;
+    memory: number;
+    disk: number;
+    temp: number;
+  };
+  runtime: [string, string];
+  lastSeen: string;
+  profile: string;
 };
 
-type DemoTask = {
-  id: string;
+type SurfaceStatCard = {
   label: string;
-  status: "running" | "queued" | "failed" | "completed";
-  target: string;
-  time: string;
+  value: string;
+  description: string;
+  icon: LucideIcon;
+  tone: "brand" | "success" | "warning" | "danger";
 };
 
-type DemoRolloutTarget = {
-  label: string;
-  status: "completed" | "running" | "pending";
-  note: string;
-};
-
-const viewMeta: Record<ViewKey, { title: string; description: string }> = {
-  dashboard: {
-    title: "Dashboard",
-    description: "Monitor node health, workload, and recent activity.",
-  },
-  nodes: {
-    title: "Nodes",
-    description: "Inspect connectivity, telemetry, terminal access, and root profiles.",
-  },
-  tasks: {
-    title: "Tasks",
-    description: "Track queued work, running executions, and scheduled operations.",
-  },
-  updates: {
-    title: "Updates",
-    description: "Review official tags, rollout waves, and recovery controls.",
-  },
-  settings: {
-    title: "Settings",
-    description: "Adjust workspace delivery, access, and operational defaults.",
-  },
-};
-
-const navGroups: Array<{
-  label: string;
-  items: Array<{ key: ViewKey; label: string; icon: LucideIcon }>;
-}> = [
+const sidebarGroups: Array<{ label: string; items: SidebarItem[] }> = [
   {
     label: "Overview",
     items: [{ key: "dashboard", label: "Dashboard", icon: LayoutDashboard }],
@@ -90,181 +92,550 @@ const navGroups: Array<{
     items: [
       { key: "nodes", label: "Nodes", icon: MonitorCog },
       { key: "tasks", label: "Tasks", icon: Workflow },
+      { key: "events", label: "Events", icon: BellRing },
+    ],
+  },
+  {
+    label: "Workspace",
+    items: [
+      { key: "members", label: "Members", icon: UserRound },
+      { key: "teams", label: "Teams", icon: Users2 },
+      { key: "audit", label: "Audit", icon: ClipboardList },
+      { key: "settings", label: "Settings", icon: Settings },
     ],
   },
   {
     label: "Platform",
     items: [
+      { key: "workspaces", label: "Workspaces", icon: FolderTree },
+      { key: "users", label: "Users", icon: Users },
       { key: "updates", label: "Updates", icon: RefreshCcw },
-      { key: "settings", label: "Settings", icon: Settings },
+      { key: "platform-audit", label: "Platform Audit", icon: ClipboardList },
+      { key: "platform-settings", label: "Platform Settings", icon: ServerCog },
     ],
   },
 ];
 
-const nodes: DemoNode[] = [
+const statCards: SurfaceStatCard[] = [
   {
-    id: "fra-web-01",
-    name: "fra-web-01",
-    hostname: "fra-web-01.internal",
+    label: "Node snapshot",
+    value: "2",
+    description: "Nodes currently loaded into this dashboard snapshot window.",
+    icon: Boxes,
+    tone: "brand",
+  },
+  {
+    label: "Online snapshot",
+    value: "2",
+    description: "Loaded snapshot nodes actively reporting recent state.",
+    icon: ServerCog,
+    tone: "success",
+  },
+  {
+    label: "Task snapshot",
+    value: "0",
+    description: "Running tasks currently present in the dashboard task window.",
+    icon: CirclePlay,
+    tone: "warning",
+  },
+  {
+    label: "Failed snapshot",
+    value: "29",
+    description: "Failed tasks currently visible in the dashboard snapshot.",
+    icon: AlertTriangle,
+    tone: "danger",
+  },
+];
+
+const nodeStatCards: SurfaceStatCard[] = [
+  {
+    label: "Visible nodes",
+    value: "2",
+    description: "Nodes currently loaded in this inventory page.",
+    icon: Boxes,
+    tone: "brand",
+  },
+  {
+    label: "Online",
+    value: "2",
+    description: "Visible nodes with healthy status and recent activity.",
+    icon: ShieldCheck,
+    tone: "success",
+  },
+  {
+    label: "Offline",
+    value: "0",
+    description: "Visible nodes that need follow-up or heartbeat recovery.",
+    icon: WifiOff,
+    tone: "danger",
+  },
+  {
+    label: "Avg CPU load",
+    value: "2%",
+    description: "Average CPU across visible nodes with telemetry in this page.",
+    icon: Cpu,
+    tone: "warning",
+  },
+];
+
+const taskStatCards: SurfaceStatCard[] = [
+  {
+    label: "Queued",
+    value: "0",
+    description: "Queued tasks visible in the current server-side page.",
+    icon: Boxes,
+    tone: "brand",
+  },
+  {
+    label: "Running",
+    value: "0",
+    description: "Active executions currently loaded in this page.",
+    icon: CirclePlay,
+    tone: "warning",
+  },
+  {
+    label: "Successful",
+    value: "22",
+    description: "Loaded tasks that completed with a successful outcome.",
+    icon: CircleCheckBig,
+    tone: "success",
+  },
+  {
+    label: "Failed",
+    value: "3",
+    description: "Loaded tasks that still need review or retry.",
+    icon: AlertTriangle,
+    tone: "danger",
+  },
+];
+
+const nodePages: TelemetryNode[][] = [
+  [
+    {
+      name: "Noderax Server",
+      host: "ip-172-26-2-73",
+      status: "online",
+      metrics: { cpu: 3, memory: 67, disk: 33, temp: 0 },
+      runtime: ["ubuntu", "amd64"],
+      lastSeen: "16 minutes ago",
+      profile: "Telemetry ready",
+    },
+    {
+      name: "RaspberryPi",
+      host: "pi-home",
+      status: "online",
+      metrics: { cpu: 2, memory: 29, disk: 3, temp: 54.3 },
+      runtime: ["ubuntu", "arm64"],
+      lastSeen: "16 minutes ago",
+      profile: "Telemetry ready",
+    },
+  ],
+  [
+    {
+      name: "fra-api-02",
+      host: "fra-api-02.internal",
+      status: "online",
+      metrics: { cpu: 18, memory: 58, disk: 29, temp: 46.2 },
+      runtime: ["ubuntu", "amd64"],
+      lastSeen: "22 seconds ago",
+      profile: "Telemetry ready",
+    },
+    {
+      name: "iad-worker-04",
+      host: "iad-worker-04.internal",
+      status: "online",
+      metrics: { cpu: 41, memory: 62, disk: 37, temp: 51.8 },
+      runtime: ["ubuntu", "arm64"],
+      lastSeen: "28 seconds ago",
+      profile: "Telemetry ready",
+    },
+  ],
+];
+
+const events = [
+  {
+    severity: "critical",
+    title: "High Cpu",
+    source: "Metrics pipeline",
+    message: "CPU usage on ip-172-26-2-73 reached 97.5%",
+    time: "12 minutes ago",
+    type: "high.cpu",
+    createdAt: "7 Nis 2026 22:47:17",
+  },
+  {
+    severity: "warning",
+    title: "High Cpu",
+    source: "Metrics pipeline",
+    message: "CPU usage on pi-home reached 95.0%",
+    time: "2 hours ago",
+    type: "high.cpu",
+    createdAt: "7 Nis 2026 21:06:55",
+  },
+  {
+    severity: "warning",
+    title: "High Cpu",
+    source: "Metrics pipeline",
+    message: "CPU usage on ip-172-26-2-73 reached 94.9%",
+    time: "6 hours ago",
+    type: "high.cpu",
+    createdAt: "7 Nis 2026 17:07:51",
+  },
+  {
+    severity: "warning",
+    title: "Node Root Access Updated",
+    source: "Node monitor",
+    message: "Node ip-172-26-2-73 root access profile was disabled.",
+    time: "1 hour ago",
+    type: "node.root-access.updated",
+    createdAt: "7 Nis 2026 00:23:11",
+  },
+  {
+    severity: "warning",
+    title: "High Cpu",
+    source: "Metrics pipeline",
+    message: "CPU usage on pi-home reached 91.4%",
+    time: "7 hours ago",
+    type: "high.cpu",
+    createdAt: "7 Nis 2026 16:23:37",
+  },
+  {
+    severity: "critical",
+    title: "High Cpu",
+    source: "Metrics pipeline",
+    message: "CPU usage on ip-172-26-2-73 reached 97.6%",
+    time: "8 hours ago",
+    type: "high.cpu",
+    createdAt: "7 Nis 2026 14:40:03",
+  },
+  {
+    severity: "warning",
+    title: "Node Root Access Updated",
+    source: "Node monitor",
+    message: "Node pi-home root access profile set to operational.",
+    time: "9 hours ago",
+    type: "node.root-access.updated",
+    createdAt: "7 Nis 2026 00:23:00",
+  },
+  {
+    severity: "warning",
+    title: "Node Root Access Updated",
+    source: "Node monitor",
+    message: "Node pi-home root access profile set to operational_terminal.",
+    time: "10 hours ago",
+    type: "node.root-access.updated",
+    createdAt: "7 Nis 2026 00:21:34",
+  },
+  {
+    severity: "critical",
+    title: "High Cpu",
+    source: "Metrics pipeline",
+    message: "CPU usage on ip-172-26-2-73 reached 100.0%",
+    time: "1 day ago",
+    type: "high.cpu",
+    createdAt: "6 Nis 2026 23:45:49",
+  },
+] as const;
+
+const activityRows = [
+  {
+    name: "Noderax Server",
+    host: "ip-172-26-2-73",
     status: "online",
-    cpu: 22,
-    memory: 58,
-    rootProfile: "Operational + terminal",
-    terminal: "Reattach window 04m 21s",
-    routes: "Email critical, Telegram warning",
-    release: "v1.0.6 stable",
+    cpu: "3%",
+    memory: "67%",
+    lastSeen: "16 minutes ago",
   },
   {
-    id: "fra-api-02",
-    name: "fra-api-02",
-    hostname: "fra-api-02.internal",
+    name: "RaspberryPi",
+    host: "pi-home",
     status: "online",
-    cpu: 31,
-    memory: 63,
-    rootProfile: "Operational only",
-    terminal: "Claim available",
-    routes: "Workspace defaults",
-    release: "v1.0.6 stable",
+    cpu: "2%",
+    memory: "29%",
+    lastSeen: "16 minutes ago",
+  },
+] as const;
+
+const nodeInventoryRows = [
+  {
+    name: "Noderax Server",
+    host: "ip-172-26-2-73",
+    status: "online",
+    team: "Unassigned",
+    lastSeen: "8 seconds ago",
+    os: "ubuntu / amd64",
+    agent: "1.0.6",
+    cpu: "3%",
+    temp: "0.0°C",
   },
   {
-    id: "iad-worker-04",
-    name: "iad-worker-04",
-    hostname: "iad-worker-04.internal",
-    status: "degraded",
-    cpu: 67,
-    memory: 72,
-    rootProfile: "Task + terminal",
-    terminal: "Transcript retained",
-    routes: "Telegram critical only",
-    release: "v1.0.5 canary",
+    name: "RaspberryPi",
+    host: "pi-home",
+    status: "online",
+    team: "Unassigned",
+    lastSeen: "8 seconds ago",
+    os: "ubuntu / arm64",
+    agent: "1.0.6",
+    cpu: "0%",
+    temp: "54.9°C",
+  },
+] as const;
+
+const taskRows = [
+  {
+    status: "success",
+    name: "PackageList",
+    subtitle: "packageList",
+    node: "Noderax Server",
+    created: "1 day ago",
+    output:
+      "Desired=Unknown/Install/Remove/Purge/Hold | Status=Not/Inst/Conf-files/Unpacked/half-conf/Half-inst/trig-aWait/Trig-pend | /Err?=(none)/Reinst-...",
   },
   {
-    id: "lon-db-01",
-    name: "lon-db-01",
-    hostname: "lon-db-01.internal",
-    status: "maintenance",
-    cpu: 14,
-    memory: 46,
-    rootProfile: "Read-only operations",
-    terminal: "Paused during maintenance",
-    routes: "Email muted, Telegram critical",
-    release: "v1.0.4 pinned",
-  },
-];
-
-const taskRuns: DemoTask[] = [
-  {
-    id: "task-1",
-    label: "nginx config verify",
-    status: "running",
-    target: "fra-web-01",
-    time: "Started 42s ago",
+    status: "success",
+    name: "PackageList",
+    subtitle: "packageList",
+    node: "Noderax Server",
+    created: "1 day ago",
+    output:
+      "Desired=Unknown/Install/Remove/Purge/Hold | Status=Not/Inst/Conf-files/Unpacked/half-conf/Half-inst/trig-aWait/Trig-pend | /Err?=(none)/Reinst-...",
   },
   {
-    id: "task-2",
-    label: "apt security patch",
-    status: "queued",
-    target: "fra-api-02",
-    time: "Queued 2m ago",
+    status: "success",
+    name: "PackageList",
+    subtitle: "packageList",
+    node: "Noderax Server",
+    created: "1 day ago",
+    output:
+      "Desired=Unknown/Install/Remove/Purge/Hold | Status=Not/Inst/Conf-files/Unpacked/half-conf/Half-inst/trig-aWait/Trig-pend | /Err?=(none)/Reinst-...",
   },
   {
-    id: "task-3",
-    label: "disk usage sweep",
-    status: "completed",
-    target: "iad-worker-04",
-    time: "Finished 6m ago",
+    status: "success",
+    name: "Agent Update",
+    subtitle: "agent.update",
+    node: "Noderax Server",
+    created: "1 day ago",
+    output: "->->->->-> reconnecting release lane ->->->->->",
   },
   {
-    id: "task-4",
-    label: "kernel check",
-    status: "failed",
-    target: "lon-db-01",
-    time: "Failed 11m ago",
+    status: "success",
+    name: "PackageList",
+    subtitle: "packageList",
+    node: "RaspberryPi",
+    created: "1 day ago",
+    output:
+      "Desired=Unknown/Install/Remove/Purge/Hold | Status=Not/Inst/Conf-files/Unpacked/half-conf/Half-inst/trig-aWait/Trig-pend | /Err?=(none)/Reinst-...",
   },
-];
+  {
+    status: "success",
+    name: "Agent Update",
+    subtitle: "agent.update",
+    node: "RaspberryPi",
+    created: "1 day ago",
+    output: "^^^^^^^^ stable agent promoted 1.0.6.",
+  },
+  {
+    status: "success",
+    name: "Agent Update",
+    subtitle: "agent.update",
+    node: "Unknown node",
+    created: "1 day ago",
+    output: "Agent reconnect confirmed 1.0.6.",
+  },
+  {
+    status: "success",
+    name: "PackageList",
+    subtitle: "packageList",
+    node: "Unknown node",
+    created: "2 days ago",
+    output:
+      "Desired=Unknown/Install/Remove/Purge/Hold | Status=Not/Inst/Conf-files/Unpacked/half-conf/Half-inst/trig-aWait/Trig-pend | /Err?=(none)/Reinst-...",
+  },
+] as const;
 
-const rolloutTargets: DemoRolloutTarget[] = [
-  { label: "Canary group", status: "completed", note: "4/4 nodes healthy" },
-  { label: "Wave 01", status: "running", note: "12/18 nodes updated" },
-  { label: "Wave 02", status: "pending", note: "Waiting for health gate" },
-  { label: "Rollback lane", status: "pending", note: "Armed but unused" },
-];
+const metricRows = [
+  { label: "CPU", key: "cpu", icon: Cpu, tone: "bg-[#ff4f45]" },
+  { label: "Memory", key: "memory", icon: MemoryStick, tone: "bg-[#58d68d]" },
+  { label: "Disk", key: "disk", icon: HardDrive, tone: "bg-[#f5b14c]" },
+  { label: "Temp", key: "temp", icon: Thermometer, tone: "bg-[#ff9b7a]" },
+] as const;
 
-const dashboardBars = [24, 33, 29, 41, 37, 49, 44, 58, 51, 63, 57, 69];
-const dashboardEvents = [
-  "fra-web-01 reattached to live terminal session",
-  "Scoped root profile synced to iad-worker-04",
-  "Workspace Telegram critical route updated",
-  "Official rollout resumed after health pass",
-];
+const summaryCopy: Record<
+  Exclude<ViewKey, "dashboard">,
+  { title: string; description: string; bullets: string[] }
+> = {
+  nodes: {
+    title: "Nodes",
+    description: "Inspect node connectivity, telemetry, and runtime state.",
+    bullets: [
+      "Per-node telemetry, package state, and live terminal entry points",
+      "Desired and applied root profiles stay visible before actions unlock",
+      "Delivery overrides appear next to connectivity and health data",
+    ],
+  },
+  tasks: {
+    title: "Tasks",
+    description: "Track executions, outcomes, and live operational work.",
+    bullets: [
+      "Queued, running, failed, and completed executions in one surface",
+      "Scheduled tasks reuse the same guarded execution model",
+      "Browser terminals and shell work stay tied to node policy",
+    ],
+  },
+  events: {
+    title: "Events",
+    description: "Review alerts, warnings, and platform event history.",
+    bullets: [
+      "Severity-labeled event feed with node and task source context",
+      "Recency-ordered stream for alert triage",
+      "Direct drill-down to nodes, tasks, and audit surfaces",
+    ],
+  },
+  members: {
+    title: "Members",
+    description: "Manage workspace access and role assignments.",
+    bullets: [
+      "Owner, admin, member, and viewer roles",
+      "Invite-first workspace membership flow",
+      "Membership changes show up in audit history",
+    ],
+  },
+  teams: {
+    title: "Teams",
+    description: "Group members and node ownership inside the workspace.",
+    bullets: [
+      "Team-linked nodes and shared operational responsibility",
+      "Works with workspace roles instead of replacing them",
+      "Useful for regional or service-based fleet slices",
+    ],
+  },
+  audit: {
+    title: "Audit",
+    description: "Inspect append-only admin and security actions.",
+    bullets: [
+      "Platform and workspace audit surfaces",
+      "Root profile, settings, member, and rollout actions tracked",
+      "Supports operational review without leaving the control plane",
+    ],
+  },
+  settings: {
+    title: "Settings",
+    description: "Configure workspace behavior and operational defaults.",
+    bullets: [
+      "Timezone, workspace metadata, and automation routing",
+      "Email and Telegram delivery preferences",
+      "Archived workspaces remain readable while mutations pause",
+    ],
+  },
+  workspaces: {
+    title: "Workspaces",
+    description: "Create and manage isolated operational boundaries.",
+    bullets: [
+      "Default workspace fallback and archive support",
+      "Search across nodes, tasks, schedules, members, and teams",
+      "Platform admins span installations while workspaces stay isolated",
+    ],
+  },
+  users: {
+    title: "Users",
+    description: "Manage operator accounts and global platform roles.",
+    bullets: [
+      "Platform-admin aware access control",
+      "Ties into workspace membership rather than duplicating it",
+      "Supports operational governance across environments",
+    ],
+  },
+  updates: {
+    title: "Updates",
+    description: "Control official tagged releases and rollout recovery.",
+    bullets: [
+      "Only official tags appear in the updates center",
+      "Sequential rollout waves with retry and rollback controls",
+      "Per-target state stays visible during rollout execution",
+    ],
+  },
+  "platform-audit": {
+    title: "Platform Audit",
+    description: "Cross-workspace administrative activity and review trail.",
+    bullets: [
+      "Platform-level changes separated from workspace audit",
+      "Useful for installation-wide governance",
+      "Preserves recent admin activity in one surface",
+    ],
+  },
+  "platform-settings": {
+    title: "Platform Settings",
+    description: "Adjust installation-wide defaults and controls.",
+    bullets: [
+      "Global settings beyond workspace scope",
+      "Supports operator governance at platform level",
+      "Keeps install-wide behavior separate from fleet operations",
+    ],
+  },
+};
 
-function useTicker<T>(values: T[], intervalMs: number) {
-  const [index, setIndex] = useState(0);
-
-  useEffect(() => {
-    if (values.length <= 1) {
-      return;
-    }
-
-    const timer = window.setInterval(() => {
-      setIndex((current) => (current + 1) % values.length);
-    }, intervalMs);
-
-    return () => window.clearInterval(timer);
-  }, [intervalMs, values.length]);
-
-  return values[index]!;
+function toneClasses(tone: "brand" | "success" | "warning" | "danger") {
+  switch (tone) {
+    case "brand":
+      return "border-primary/18 bg-primary/10 text-primary";
+    case "success":
+      return "border-emerald-400/18 bg-emerald-400/10 text-emerald-300";
+    case "warning":
+      return "border-amber-400/18 bg-amber-400/10 text-amber-300";
+    case "danger":
+      return "border-rose-400/18 bg-rose-400/10 text-rose-300";
+  }
 }
 
-function DemoPanel({
+function eventSeverityClasses(severity: "warning" | "critical") {
+  return severity === "critical"
+    ? "border-rose-400/18 bg-rose-400/10 text-rose-300"
+    : "border-amber-400/18 bg-amber-400/10 text-amber-300";
+}
+
+function taskStatusClasses(status: "success" | "running" | "queued" | "failed") {
+  switch (status) {
+    case "success":
+      return "border-emerald-400/16 bg-emerald-400/8 text-emerald-300";
+    case "running":
+      return "border-amber-400/18 bg-amber-400/10 text-amber-300";
+    case "queued":
+      return "border-primary/18 bg-primary/10 text-primary";
+    case "failed":
+      return "border-rose-400/18 bg-rose-400/10 text-rose-300";
+  }
+}
+
+function SurfaceCard({
   className,
   children,
-  ...props
-}: HTMLAttributes<HTMLDivElement>) {
+}: {
+  className?: string;
+  children: ReactNode;
+}) {
   return (
     <div
       className={cn(
-        "rounded-[1.35rem] border border-white/8 bg-white/[0.035] shadow-[inset_0_1px_0_rgba(255,255,255,0.045)] backdrop-blur-md",
+        "rounded-[1.5rem] border border-white/7 bg-[#121214] shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]",
         className,
       )}
-      {...props}
     >
       {children}
     </div>
   );
 }
 
-function StatusBadge({
-  tone,
+function SmallBadge({
+  className,
   children,
 }: {
-  tone:
-    | "online"
-    | "degraded"
-    | "maintenance"
-    | "running"
-    | "queued"
-    | "failed"
-    | "completed"
-    | "pending";
-  children: React.ReactNode;
+  className?: string;
+  children: ReactNode;
 }) {
-  const toneMap = {
-    online: "border-emerald-400/20 bg-emerald-400/12 text-emerald-100",
-    degraded: "border-amber-400/20 bg-amber-400/12 text-amber-100",
-    maintenance: "border-slate-300/14 bg-white/8 text-white/75",
-    running: "border-primary/20 bg-primary/12 text-primary-foreground",
-    queued: "border-amber-400/20 bg-amber-400/12 text-amber-100",
-    failed: "border-rose-400/20 bg-rose-400/12 text-rose-100",
-    completed: "border-emerald-400/20 bg-emerald-400/12 text-emerald-100",
-    pending: "border-white/12 bg-white/7 text-white/65",
-  } as const;
-
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-medium tracking-[0.02em]",
-        toneMap[tone],
+        "inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.16em]",
+        className,
       )}
     >
       {children}
@@ -272,607 +643,734 @@ function StatusBadge({
   );
 }
 
-function StatCard({
+function ControlPill({
   label,
-  value,
-  icon: Icon,
+  className,
 }: {
   label: string;
-  value: React.ReactNode;
-  icon: LucideIcon;
+  className?: string;
 }) {
   return (
-    <DemoPanel className="p-4">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/42">
-            {label}
-          </p>
-          <div className="mt-3 text-[1.65rem] font-semibold tracking-tight text-white">
-            {value}
-          </div>
-        </div>
-        <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/8 bg-white/[0.045]">
-          <Icon className="h-4 w-4 text-primary" />
-        </div>
-      </div>
-    </DemoPanel>
+    <button
+      type="button"
+      className={cn(
+        "inline-flex h-9 items-center gap-2 rounded-xl border border-white/8 bg-white/[0.03] px-3 text-[0.82rem] text-white/62",
+        className,
+      )}
+    >
+      <span>{label}</span>
+      <ChevronDown className="h-3.5 w-3.5 text-white/34" />
+    </button>
   );
 }
 
-function SidebarItem({
+function TableActionButton({
+  children,
+  tone = "default",
+}: {
+  children: ReactNode;
+  tone?: "default" | "danger" | "primary";
+}) {
+  return (
+    <button
+      type="button"
+      className={cn(
+        "inline-flex h-8 items-center gap-1.5 rounded-xl border px-3 text-xs font-medium transition-colors",
+        tone === "default" &&
+          "border-white/8 bg-white/[0.03] text-white/78 hover:bg-white/[0.06]",
+        tone === "danger" &&
+          "border-primary/35 bg-primary/12 text-primary hover:bg-primary/18",
+        tone === "primary" &&
+          "border-primary/25 bg-primary text-white hover:bg-primary/90",
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+function SidebarLink({
   item,
   active,
   onSelect,
 }: {
-  item: { key: ViewKey; label: string; icon: LucideIcon };
+  item: SidebarItem;
   active: boolean;
-  onSelect: (key: ViewKey) => void;
+  onSelect: (value: ViewKey) => void;
 }) {
   return (
     <button
       type="button"
       onClick={() => onSelect(item.key)}
       className={cn(
-        "flex w-full items-center gap-3 rounded-2xl border px-3 py-2.5 text-left text-sm transition-all",
+        "flex w-full items-center gap-2.5 rounded-xl border px-2.5 py-2 text-left text-[0.84rem] transition-all",
         active
-          ? "border-primary/28 bg-primary/14 text-white shadow-[0_10px_30px_-20px_rgba(255,98,71,0.7)]"
-          : "border-transparent text-white/62 hover:border-white/8 hover:bg-white/[0.04] hover:text-white",
+          ? "border-primary/28 bg-primary/13 text-primary"
+          : "border-transparent text-white/68 hover:border-white/8 hover:bg-white/[0.03] hover:text-white",
       )}
     >
-      <item.icon className={cn("h-4 w-4 shrink-0", active ? "text-primary" : "text-white/45")} />
+      <item.icon className={cn("h-4 w-4 shrink-0", active ? "text-primary" : "text-white/42")} />
       <span className="truncate">{item.label}</span>
+      {item.key === "tasks" ? (
+        <ChevronDown className="ml-auto h-4 w-4 text-white/36" />
+      ) : null}
     </button>
   );
 }
 
-function DashboardScene({
-  totalNodes,
-  onlineNodes,
-  runningTasks,
-  queuedAlerts,
+function SnapshotCard({
+  label,
+  value,
+  description,
+  icon: Icon,
+  tone,
+}: SurfaceStatCard) {
+  return (
+    <SurfaceCard className="p-3.5">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/38">
+            {label}
+          </p>
+          <p className="mt-2.5 text-[1.9rem] font-semibold tracking-tight text-white">
+            {value}
+          </p>
+          <p className="mt-2.5 max-w-[17rem] text-[0.82rem] leading-6 text-white/46">
+            {description}
+          </p>
+        </div>
+        <div
+          className={cn(
+            "flex h-10 w-10 items-center justify-center rounded-xl border",
+            toneClasses(tone),
+          )}
+        >
+          <Icon className="h-4 w-4" />
+        </div>
+      </div>
+    </SurfaceCard>
+  );
+}
+
+function TelemetryCard({
+  node,
   shouldReduceMotion,
 }: {
-  totalNodes: number;
-  onlineNodes: number;
-  runningTasks: number;
-  queuedAlerts: number;
+  node: TelemetryNode;
   shouldReduceMotion: boolean;
 }) {
   return (
-    <div className="grid h-full gap-4 xl:grid-cols-[1.35fr_0.9fr]">
-      <div className="grid min-h-0 gap-4">
-        <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-4">
-          <StatCard label="Node snapshot" value={totalNodes} icon={Boxes} />
-          <StatCard label="Online snapshot" value={onlineNodes} icon={ServerCog} />
-          <StatCard label="Running tasks" value={runningTasks} icon={CirclePlay} />
-          <StatCard label="Queued alerts" value={queuedAlerts} icon={BellRing} />
+    <div className="h-full max-w-[17.5rem] rounded-[1.35rem] border border-primary/18 bg-[linear-gradient(180deg,rgba(22,22,24,1),rgba(15,15,17,1))] p-2.5 shadow-[inset_0_0_0_1px_rgba(255,98,71,0.14)]">
+      <div className="flex h-full flex-col gap-2.5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex min-w-0 items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-primary/18 bg-primary/10 text-primary">
+              <ServerCog className="h-4 w-4" />
+            </div>
+            <div className="min-w-0">
+              <div className="mb-1.5 flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#ff5447]" />
+                <span className="h-1.5 w-1.5 rounded-full bg-[#58d68d]" />
+                <span className="h-1.5 w-1.5 rounded-full bg-[#f5b14c]" />
+                <span className="ml-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/42">
+                  Node
+                </span>
+              </div>
+              <p className="truncate text-[0.96rem] font-semibold tracking-tight text-white">
+                {node.name}
+              </p>
+              <p className="truncate text-xs text-white/42">{node.host}</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full border border-white/8 bg-white/[0.03]">
+              <MoreVertical className="h-4 w-4 text-white/50" />
+            </div>
+            <SmallBadge className="border-emerald-400/16 bg-emerald-400/8 text-emerald-300">
+              ONLINE
+            </SmallBadge>
+          </div>
         </div>
 
-        <DemoPanel className="grid min-h-0 gap-4 p-4 xl:grid-cols-[1.1fr_0.9fr]">
-          <div className="min-h-0">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-sm font-medium text-white">Node telemetry board</p>
-                <p className="mt-1 text-sm text-white/45">
-                  The same dashboard window operators use for fleet snapshot scanning.
-                </p>
-              </div>
-              <StatusBadge tone="online">Realtime connected</StatusBadge>
-            </div>
-
-            <div className="mt-5 flex h-36 items-end gap-2">
-              {dashboardBars.map((bar, index) => (
-                <div key={`bar-${index}`} className="flex h-full flex-1 items-end">
-                  <motion.div
-                    className="w-full rounded-t-[1rem] bg-gradient-to-t from-primary/25 via-primary/80 to-orange-300/90 shadow-[0_0_20px_rgba(255,98,71,0.22)]"
-                    animate={
-                      shouldReduceMotion
-                        ? { height: `${bar}%` }
-                        : {
-                            height: [
-                              `${Math.max(bar - 8, 20)}%`,
-                              `${bar}%`,
-                              `${Math.min(bar + 7, 96)}%`,
-                              `${Math.max(bar - 3, 22)}%`,
-                            ],
-                          }
-                    }
-                    transition={{
-                      duration: 4.6,
-                      repeat: Infinity,
-                      delay: index * 0.12,
-                      ease: "easeInOut",
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              {nodes.slice(0, 4).map((node) => (
-                <div
-                  key={node.id}
-                  className="rounded-2xl border border-white/7 bg-black/20 px-3 py-3"
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-medium text-white">{node.name}</p>
-                      <p className="text-xs text-white/42">{node.hostname}</p>
-                    </div>
-                    <StatusBadge tone={node.status}>{node.status}</StatusBadge>
-                  </div>
-                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-white/55">
-                    <span>CPU {node.cpu}%</span>
-                    <span>MEM {node.memory}%</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="grid min-h-0 gap-4">
-            <DemoPanel className="p-4">
-              <p className="text-sm font-medium text-white">Recent events</p>
-              <div className="mt-4 space-y-3">
-                {dashboardEvents.map((event, index) => (
-                  <div
-                    key={event}
-                    className="rounded-2xl border border-white/7 bg-black/20 px-3 py-3"
-                  >
-                    <div className="flex items-start gap-3">
-                      <motion.span
-                        className="mt-1.5 h-2 w-2 rounded-full bg-primary shadow-[0_0_14px_rgba(255,98,71,0.8)]"
-                        animate={
-                          shouldReduceMotion
-                            ? undefined
-                            : { opacity: [0.45, 1, 0.45], scale: [0.95, 1.2, 0.95] }
-                        }
-                        transition={{
-                          duration: 2.2,
-                          repeat: Infinity,
-                          delay: index * 0.25,
-                          ease: "easeInOut",
-                        }}
-                      />
-                      <div>
-                        <p className="text-sm leading-6 text-white/78">{event}</p>
-                        <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-white/34">
-                          workspace activity
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </DemoPanel>
-
-            <DemoPanel className="grid gap-3 p-4 md:grid-cols-2">
-              <div className="rounded-2xl border border-white/7 bg-black/20 p-4">
-                <p className="text-sm font-medium text-white">Root profiles</p>
-                <p className="mt-2 text-sm text-white/46">
-                  Operational, task, and terminal scope stay visible in one place.
-                </p>
-                <div className="mt-4 space-y-2 text-xs text-white/62">
-                  <div className="flex items-center justify-between">
-                    <span>Desired vs applied</span>
-                    <span className="text-emerald-300">100% synced</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>Terminal claims</span>
-                    <span>5-minute reattach</span>
-                  </div>
-                </div>
-              </div>
-              <div className="rounded-2xl border border-white/7 bg-black/20 p-4">
-                <p className="text-sm font-medium text-white">Delivery routes</p>
-                <p className="mt-2 text-sm text-white/46">
-                  Email and Telegram automation exposed at workspace and node level.
-                </p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <StatusBadge tone="completed">Email critical</StatusBadge>
-                  <StatusBadge tone="running">Telegram warning</StatusBadge>
-                </div>
-              </div>
-            </DemoPanel>
-          </div>
-        </DemoPanel>
-      </div>
-
-      <div className="grid min-h-0 gap-4">
-        <DemoPanel className="p-4">
-          <p className="text-sm font-medium text-white">Workspace pulse</p>
-          <div className="mt-4 grid gap-3">
-            {[
-              "Root-aware tasks and browser terminals",
-              "Official tagged releases through one updates center",
-              "Invite-first workspace roles and audit visibility",
-            ].map((item) => (
-              <div
-                key={item}
-                className="flex items-start gap-3 rounded-2xl border border-white/7 bg-black/20 px-3 py-3"
-              >
-                <CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-300" />
-                <span className="text-sm leading-6 text-white/74">{item}</span>
-              </div>
-            ))}
-          </div>
-        </DemoPanel>
-
-        <DemoPanel className="p-4">
-          <p className="text-sm font-medium text-white">Release lane</p>
-          <div className="mt-4 rounded-2xl border border-white/7 bg-black/20 p-4">
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-sm text-white/66">v1.0.6 stable</span>
-              <span className="text-sm font-semibold text-white">72%</span>
-            </div>
-            <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-white/8">
-              <motion.div
-                className="h-full rounded-full bg-gradient-to-r from-primary via-orange-400 to-orange-300"
-                animate={{ width: "72%" }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-              />
-            </div>
-            <div className="mt-4 space-y-2">
-              {rolloutTargets.slice(0, 3).map((target) => (
-                <div
-                  key={target.label}
-                  className="flex items-center justify-between gap-3 rounded-2xl border border-white/7 bg-white/[0.03] px-3 py-2.5"
-                >
-                  <span className="text-sm text-white/74">{target.label}</span>
-                  <StatusBadge tone={target.status}>{target.status}</StatusBadge>
-                </div>
-              ))}
-            </div>
-          </div>
-        </DemoPanel>
-      </div>
-    </div>
-  );
-}
-
-function NodesScene({
-  selectedNode,
-  setSelectedNodeId,
-}: {
-  selectedNode: DemoNode;
-  setSelectedNodeId: (value: string) => void;
-}) {
-  return (
-    <div className="grid h-full gap-4 xl:grid-cols-[0.86fr_1.14fr]">
-      <DemoPanel className="p-4">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className="text-sm font-medium text-white">Node list</p>
-            <p className="mt-1 text-sm text-white/45">
-              Fleet nodes with status, telemetry, and route visibility.
-            </p>
-          </div>
-          <StatusBadge tone="online">4 nodes loaded</StatusBadge>
-        </div>
-
-        <div className="mt-4 space-y-3">
-          {nodes.map((node) => (
-            <button
-              key={node.id}
-              type="button"
-              onClick={() => setSelectedNodeId(node.id)}
-              className={cn(
-                "w-full rounded-[1.2rem] border px-3 py-3 text-left transition-all",
-                selectedNode.id === node.id
-                  ? "border-primary/30 bg-primary/12"
-                  : "border-white/7 bg-black/20 hover:border-white/12 hover:bg-white/[0.04]",
-              )}
-            >
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-sm font-medium text-white">{node.name}</p>
-                  <p className="mt-1 text-xs text-white/42">{node.hostname}</p>
-                </div>
-                <StatusBadge tone={node.status}>{node.status}</StatusBadge>
-              </div>
-              <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-white/58">
-                <span>CPU {node.cpu}%</span>
-                <span>MEM {node.memory}%</span>
-              </div>
-            </button>
-          ))}
-        </div>
-      </DemoPanel>
-
-      <div className="grid gap-4">
-        <DemoPanel className="p-4">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-3">
-                <p className="text-xl font-semibold tracking-tight text-white">
-                  {selectedNode.name}
-                </p>
-                <StatusBadge tone={selectedNode.status}>{selectedNode.status}</StatusBadge>
-              </div>
-              <p className="mt-1 text-sm text-white/45">{selectedNode.hostname}</p>
-            </div>
-            <StatusBadge tone="completed">{selectedNode.release}</StatusBadge>
-          </div>
-
-          <div className="mt-5 grid gap-3 md:grid-cols-3">
-            <StatCard label="CPU" value={`${selectedNode.cpu}%`} icon={Activity} />
-            <StatCard label="Memory" value={`${selectedNode.memory}%`} icon={Boxes} />
-            <StatCard label="Terminal" value="Ready" icon={TerminalSquare} />
-          </div>
-        </DemoPanel>
-
-        <div className="grid gap-4 md:grid-cols-3">
-          <DemoPanel className="p-4">
-            <p className="text-sm font-medium text-white">Root profile</p>
-            <p className="mt-3 text-sm leading-6 text-white/72">
-              {selectedNode.rootProfile}
-            </p>
-          </DemoPanel>
-          <DemoPanel className="p-4">
-            <p className="text-sm font-medium text-white">Terminal state</p>
-            <p className="mt-3 text-sm leading-6 text-white/72">
-              {selectedNode.terminal}
-            </p>
-          </DemoPanel>
-          <DemoPanel className="p-4">
-            <p className="text-sm font-medium text-white">Delivery routes</p>
-            <p className="mt-3 text-sm leading-6 text-white/72">
-              {selectedNode.routes}
-            </p>
-          </DemoPanel>
-        </div>
-
-        <DemoPanel className="p-4">
-          <p className="text-sm font-medium text-white">Node summary</p>
-          <div className="mt-4 grid gap-3 md:grid-cols-2">
-            {[
-              "Telemetry, tasks, and browser terminal are surfaced from the same node detail view.",
-              "Root-aware actions stay disabled until desired and applied profiles converge.",
-              "Workspace delivery overrides remain visible beside node connectivity.",
-              "Official release state sits next to runtime metrics instead of a separate tool.",
-            ].map((item) => (
-              <div
-                key={item}
-                className="rounded-2xl border border-white/7 bg-black/20 px-3 py-3 text-sm leading-6 text-white/72"
-              >
-                {item}
-              </div>
-            ))}
-          </div>
-        </DemoPanel>
-      </div>
-    </div>
-  );
-}
-
-function TasksScene({
-  runningTasks,
-  queuedTasks,
-}: {
-  runningTasks: number;
-  queuedTasks: number;
-}) {
-  return (
-    <div className="grid h-full gap-4 xl:grid-cols-[1.05fr_0.95fr]">
-      <div className="grid min-h-0 gap-4">
-        <div className="grid gap-3 md:grid-cols-3">
-          <StatCard label="Running" value={runningTasks} icon={CirclePlay} />
-          <StatCard label="Queued" value={queuedTasks} icon={Clock3} />
-          <StatCard label="Schedules" value={8} icon={Workflow} />
-        </div>
-
-        <DemoPanel className="p-4">
+        <div className="rounded-[1.2rem] border border-white/8 bg-[#0d0d0f] p-2.5">
           <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-sm font-medium text-white">Recent task runs</p>
-              <p className="mt-1 text-sm text-white/45">
-                Queue, run, and result state share the same task surface.
+            <div className="flex items-center gap-2">
+              <motion.span
+                className="h-3.5 w-3.5 rounded-full bg-primary/18 p-[3px]"
+                animate={
+                  shouldReduceMotion
+                    ? undefined
+                    : { boxShadow: ["0 0 0 rgba(255,98,71,0)", "0 0 14px rgba(255,98,71,0.45)", "0 0 0 rgba(255,98,71,0)"] }
+                }
+                transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <span className="block h-full w-full rounded-full bg-primary" />
+              </motion.span>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/42">
+                Resource snapshot
               </p>
             </div>
-            <StatusBadge tone="running">Live queue</StatusBadge>
+            <p className="text-xs font-medium text-white/78">Latest sample</p>
           </div>
 
-          <div className="mt-4 space-y-3">
-            {taskRuns.map((task) => (
-              <div
-                key={task.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/7 bg-black/20 px-3 py-3"
-              >
-                <div>
-                  <p className="text-sm font-medium text-white">{task.label}</p>
-                  <p className="mt-1 text-xs text-white/42">
-                    {task.target} · {task.time}
-                  </p>
+          <div className="mt-2.5 grid gap-1.5">
+            {metricRows.map((metric) => {
+              const MetricIcon = metric.icon;
+              const value = node.metrics[metric.key];
+
+              return (
+                <div
+                  key={metric.key}
+                  className="rounded-xl border border-white/7 bg-[#111113] px-2.5 py-2"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <MetricIcon className="h-3.5 w-3.5 text-white/46" />
+                      <span className="text-xs font-medium text-white/78">
+                        {metric.label}
+                      </span>
+                    </div>
+                    <span className="font-mono text-xs text-white/46">
+                      {metric.key === "temp" ? `${value} °C` : `${value}%`}
+                    </span>
+                  </div>
+                  <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/[0.05]">
+                    <motion.div
+                      className={cn("h-full rounded-full", metric.tone)}
+                      animate={{ width: `${Math.max(4, Math.min(100, value))}%` }}
+                      transition={{ duration: 0.8, ease: "easeOut" }}
+                    />
+                  </div>
                 </div>
-                <StatusBadge tone={task.status}>{task.status}</StatusBadge>
-              </div>
-            ))}
+              );
+            })}
           </div>
-        </DemoPanel>
-      </div>
+        </div>
 
-      <div className="grid gap-4">
-        <DemoPanel className="p-4">
-          <p className="text-sm font-medium text-white">Scheduled tasks</p>
-          <div className="mt-4 space-y-3">
-            {[
-              "hourly disk sweep · 12 nodes · next run 08:00 UTC",
-              "nginx config verify · 6 nodes · next run 09:30 UTC",
-              "kernel compliance check · 4 nodes · next run 12:00 UTC",
-            ].map((item) => (
-              <div
-                key={item}
-                className="rounded-2xl border border-white/7 bg-black/20 px-3 py-3 text-sm text-white/74"
-              >
-                {item}
-              </div>
-            ))}
+        <div className="grid gap-1.5 sm:grid-cols-2">
+          <div className="rounded-xl border border-white/7 bg-[#0f0f11] px-2.5 py-2">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/38">
+              Runtime
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {node.runtime.map((item) => (
+                <span
+                  key={item}
+                  className="rounded-full border border-white/8 bg-white/[0.03] px-2.5 py-1 text-[10px] font-medium text-white/68"
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
           </div>
-        </DemoPanel>
+          <div className="rounded-xl border border-white/7 bg-[#0f0f11] px-2.5 py-2">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/38">
+              Last seen
+            </p>
+            <p className="mt-1.5 text-sm font-medium text-white">{node.lastSeen}</p>
+          </div>
+        </div>
 
-        <DemoPanel className="p-4">
-          <p className="text-sm font-medium text-white">Guarded execution</p>
-          <div className="mt-4 grid gap-3">
-            {[
-              "Task and shell surfaces honor the node's applied root profile.",
-              "Queued work remains visible even if realtime degrades.",
-              "Browser terminals keep a five-minute reattach lane after exit.",
-            ].map((item) => (
-              <div
-                key={item}
-                className="flex items-start gap-3 rounded-2xl border border-white/7 bg-black/20 px-3 py-3"
-              >
-                <ShieldCheck className="mt-0.5 h-4 w-4 text-primary" />
-                <span className="text-sm leading-6 text-white/72">{item}</span>
-              </div>
-            ))}
+        <div className="mt-auto flex items-center justify-between rounded-xl border border-white/7 bg-[#0f0f11] px-2.5 py-2">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/38">
+              Rack profile
+            </p>
+            <p className="mt-1 text-xs font-medium text-white/78">{node.profile}</p>
           </div>
-        </DemoPanel>
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-emerald-400/16 bg-emerald-400/8 text-emerald-300">
+            <ServerCog className="h-4 w-4" />
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
-function UpdatesScene({ rolloutProgress }: { rolloutProgress: number }) {
+function DashboardScene({
+  pageIndex,
+  setPageIndex,
+  shouldReduceMotion,
+}: {
+  pageIndex: number;
+  setPageIndex: (value: number) => void;
+  shouldReduceMotion: boolean;
+}) {
   return (
-    <div className="grid h-full gap-4 xl:grid-cols-[1.05fr_0.95fr]">
-      <DemoPanel className="p-4">
-        <div className="flex flex-wrap items-start justify-between gap-4">
+    <div className="flex h-full flex-col gap-3.5">
+      <div className="grid gap-3.5 xl:grid-cols-4">
+        {statCards.map((card) => (
+          <SnapshotCard key={card.label} {...card} />
+        ))}
+      </div>
+
+      <SurfaceCard className="flex min-h-[18.5rem] flex-col overflow-hidden">
+        <div className="flex items-center justify-between gap-4 border-b border-white/7 px-4 py-3">
           <div>
-            <p className="text-sm font-medium text-white">Official releases</p>
-            <p className="mt-1 text-sm text-white/45">
-              Tagged agent updates move through monitored rollout waves.
+            <p className="text-[0.98rem] font-medium text-white">Node telemetry board</p>
+            <p className="mt-1 text-[0.82rem] text-white/46">
+              Nodes are shown in groups of four so each telemetry snapshot stays separate and easy to scan.
             </p>
           </div>
-          <StatusBadge tone="completed">v1.0.6 stable</StatusBadge>
+          <div className="flex items-center gap-2">
+            <span className="rounded-full border border-white/8 bg-white/[0.03] px-2.5 py-1 text-[11px] text-white/52">
+              {pageIndex + 1}-{nodePages.length} of {nodePages.length}
+            </span>
+            <button
+              type="button"
+              onClick={() => setPageIndex(Math.max(0, pageIndex - 1))}
+              className="flex h-7 w-7 items-center justify-center rounded-full border border-white/8 bg-white/[0.03] text-white/58 transition-colors hover:bg-white/[0.06]"
+              aria-label="Previous node group"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setPageIndex(Math.min(nodePages.length - 1, pageIndex + 1))}
+              className="flex h-7 w-7 items-center justify-center rounded-full border border-white/8 bg-white/[0.03] text-white/58 transition-colors hover:bg-white/[0.06]"
+              aria-label="Next node group"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
-        <div className="mt-5 rounded-[1.2rem] border border-white/7 bg-black/20 p-4">
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-sm text-white/66">Current rollout progress</span>
-            <span className="text-sm font-semibold text-white">{rolloutProgress}%</span>
-          </div>
-          <div className="mt-3 h-3 overflow-hidden rounded-full bg-white/8">
+        <div className="flex-1 overflow-hidden px-4 py-3.5">
+          <AnimatePresence mode="wait" initial={false}>
             <motion.div
-              className="h-full rounded-full bg-gradient-to-r from-primary via-orange-400 to-orange-300"
-              animate={{ width: `${rolloutProgress}%` }}
-              transition={{ duration: 0.9, ease: "easeOut" }}
-            />
-          </div>
-          <div className="mt-4 grid gap-3">
-            {rolloutTargets.map((target) => (
-              <div
-                key={target.label}
-                className="flex items-center justify-between gap-3 rounded-2xl border border-white/7 bg-white/[0.03] px-3 py-3"
-              >
-                <div>
-                  <p className="text-sm font-medium text-white">{target.label}</p>
-                  <p className="mt-1 text-xs text-white/42">{target.note}</p>
-                </div>
-                <StatusBadge tone={target.status}>{target.status}</StatusBadge>
-              </div>
-            ))}
-          </div>
+              key={pageIndex}
+              initial={shouldReduceMotion ? undefined : { opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={shouldReduceMotion ? undefined : { opacity: 0, y: -8 }}
+              transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+              className="flex h-full gap-3.5"
+            >
+              {nodePages[pageIndex]!.map((node) => (
+                <TelemetryCard
+                  key={`${pageIndex}-${node.name}`}
+                  node={node}
+                  shouldReduceMotion={shouldReduceMotion}
+                />
+              ))}
+              <div className="hidden flex-1 xl:block" />
+            </motion.div>
+          </AnimatePresence>
         </div>
-      </DemoPanel>
+      </SurfaceCard>
 
-      <div className="grid gap-4">
-        <DemoPanel className="p-4">
-          <p className="text-sm font-medium text-white">Release center</p>
-          <div className="mt-4 grid gap-3 md:grid-cols-2">
-            <StatCard label="Eligible nodes" value={34} icon={MonitorCog} />
-            <StatCard label="Retry ready" value={6} icon={RefreshCcw} />
+      <div className="grid min-h-0 flex-1 gap-3.5 xl:grid-cols-[0.92fr_1.08fr]">
+        <SurfaceCard className="min-h-0 overflow-hidden">
+          <div className="border-b border-white/7 px-4 py-3">
+            <p className="text-[0.98rem] font-medium text-white">Recent events</p>
+            <p className="mt-1 text-[0.82rem] text-white/46">
+              Alerts, state changes, and task transitions ordered by recency.
+            </p>
           </div>
-        </DemoPanel>
-
-        <DemoPanel className="p-4">
-          <p className="text-sm font-medium text-white">Recovery controls</p>
-          <div className="mt-4 space-y-3">
-            {[
-              "Retry, skip, resume, cancel, and rollback stay in one updates center.",
-              "Rollout targets preserve per-node state and operator notes.",
-              "Only official tagged builds appear in the release surface.",
-            ].map((item) => (
+          <div className="divide-y divide-white/7">
+            {events.slice(0, 5).map((event) => (
               <div
-                key={item}
-                className="rounded-2xl border border-white/7 bg-black/20 px-3 py-3 text-sm leading-6 text-white/72"
+                key={`${event.title}-${event.createdAt}`}
+                className="flex items-start gap-3 px-4 py-3.5"
               >
-                {item}
+                <SmallBadge className={eventSeverityClasses(event.severity)}>
+                  {event.severity}
+                </SmallBadge>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-medium text-white">{event.title}</p>
+                    <span className="text-[10px] uppercase tracking-[0.18em] text-white/36">
+                      {event.source}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-[0.82rem] leading-6 text-white/52">{event.message}</p>
+                </div>
+                <span className="shrink-0 text-xs text-white/38">{event.time}</span>
               </div>
             ))}
           </div>
-        </DemoPanel>
+        </SurfaceCard>
+
+        <SurfaceCard className="min-h-0 overflow-hidden">
+          <div className="border-b border-white/7 px-4 py-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/32">
+              Node snapshot
+            </p>
+            <p className="mt-1.5 text-[0.98rem] font-medium text-white">Recent node activity</p>
+            <p className="mt-1 text-[0.82rem] text-white/46">
+              A concise view of the nodes contributing the most recent telemetry.
+            </p>
+          </div>
+
+          <div className="overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="border-b border-white/7">
+                <tr>
+                  {["Name", "Status", "CPU", "Memory", "Last seen", "Actions"].map((head) => (
+                    <th
+                      key={head}
+                      className="px-3.5 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.18em] text-white/34"
+                    >
+                      {head}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {activityRows.map((row) => (
+                  <tr key={row.name} className="border-b border-white/7">
+                    <td className="px-3.5 py-3.5">
+                      <div>
+                        <p className="font-medium text-white">{row.name}</p>
+                        <p className="text-xs text-white/42">{row.host}</p>
+                      </div>
+                    </td>
+                    <td className="px-3.5 py-3.5">
+                      <SmallBadge className="border-emerald-400/16 bg-emerald-400/8 text-emerald-300">
+                        {row.status}
+                      </SmallBadge>
+                    </td>
+                    <td className="px-3.5 py-3.5 text-white/72">{row.cpu}</td>
+                    <td className="px-3.5 py-3.5 text-white/72">{row.memory}</td>
+                    <td className="px-3.5 py-3.5 text-white/46">{row.lastSeen}</td>
+                    <td className="px-3.5 py-3.5">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-full border border-white/8 bg-white/[0.03] text-white/52">
+                        <MoreVertical className="h-4 w-4" />
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </SurfaceCard>
       </div>
     </div>
   );
 }
 
-function SettingsScene() {
+function NodesScene() {
   return (
-    <div className="grid h-full gap-4 lg:grid-cols-2">
-      <DemoPanel className="p-4">
-        <div className="flex items-center justify-between gap-3">
+    <div className="flex h-full flex-col gap-3.5">
+      <div className="grid gap-3.5 xl:grid-cols-4">
+        {nodeStatCards.map((card) => (
+          <SnapshotCard key={card.label} {...card} />
+        ))}
+      </div>
+
+      <SurfaceCard className="overflow-hidden">
+        <div className="border-b border-white/7 px-4 py-3">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/32">
+                Directory
+              </p>
+              <p className="mt-1.5 text-[0.98rem] font-medium text-white">Node inventory</p>
+              <p className="mt-1 text-[0.82rem] text-white/46">
+                Filter nodes, page through results, and open node-level detail.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <ControlPill label="all" />
+              <ControlPill label="All teams" />
+              <ControlPill label="all" />
+              <TableActionButton>Previous</TableActionButton>
+              <span className="px-1 text-[11px] text-white/42">Page 1</span>
+              <TableActionButton>Next</TableActionButton>
+              <TableActionButton tone="primary">+ Add node</TableActionButton>
+            </div>
+          </div>
+        </div>
+
+        <div className="overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="border-b border-white/7">
+              <tr>
+                {[
+                  "Name",
+                  "Status",
+                  "Team",
+                  "Last seen",
+                  "OS / Arch",
+                  "Agent",
+                  "Latest CPU",
+                  "Latest Temp",
+                  "Actions",
+                ].map((head) => (
+                  <th
+                    key={head}
+                    className="px-3.5 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.18em] text-white/34"
+                  >
+                    {head}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {nodeInventoryRows.map((row) => (
+                <tr key={row.name} className="border-b border-white/7">
+                  <td className="px-3.5 py-3.5">
+                    <div>
+                      <p className="font-medium text-white">{row.name}</p>
+                      <p className="text-xs text-white/42">{row.host}</p>
+                    </div>
+                  </td>
+                  <td className="px-3.5 py-3.5">
+                    <SmallBadge className="border-emerald-400/16 bg-emerald-400/8 text-emerald-300">
+                      {row.status}
+                    </SmallBadge>
+                  </td>
+                  <td className="px-3.5 py-3.5 text-white/62">{row.team}</td>
+                  <td className="px-3.5 py-3.5 text-white/46">{row.lastSeen}</td>
+                  <td className="px-3.5 py-3.5 text-white/62">{row.os}</td>
+                  <td className="px-3.5 py-3.5 text-white/62">{row.agent}</td>
+                  <td className="px-3.5 py-3.5 text-emerald-300">{row.cpu}</td>
+                  <td className="px-3.5 py-3.5 text-emerald-300">{row.temp}</td>
+                  <td className="px-3.5 py-3.5">
+                    <div className="flex items-center justify-end gap-2">
+                      <TableActionButton>Inspect</TableActionButton>
+                      <TableActionButton>
+                        Terminal
+                        <SquareTerminal className="h-3.5 w-3.5" />
+                      </TableActionButton>
+                      <TableActionButton>
+                        <MoreVertical className="h-3.5 w-3.5" />
+                        Actions
+                      </TableActionButton>
+                      <TableActionButton tone="danger">Delete</TableActionButton>
+                      <TableActionButton>
+                        Open
+                        <ExternalLink className="h-3.5 w-3.5" />
+                      </TableActionButton>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </SurfaceCard>
+    </div>
+  );
+}
+
+function TasksScene() {
+  return (
+    <div className="flex h-full flex-col gap-3.5">
+      <div className="grid gap-3.5 xl:grid-cols-4">
+        {taskStatCards.map((card) => (
+          <SnapshotCard key={card.label} {...card} />
+        ))}
+      </div>
+
+      <SurfaceCard className="min-h-0 overflow-hidden">
+        <div className="border-b border-white/7 px-4 py-3">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/32">
+                Ledger
+              </p>
+              <p className="mt-1.5 text-[0.98rem] font-medium text-white">Task list</p>
+              <p className="mt-1 text-[0.82rem] text-white/46">
+                Filter current execution work and open full task detail.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <ControlPill label="all" />
+              <ControlPill label="All nodes" />
+              <ControlPill label="All teams" />
+              <TableActionButton>Previous</TableActionButton>
+              <span className="px-1 text-[11px] text-white/42">Page 1</span>
+              <TableActionButton>Next</TableActionButton>
+              <TableActionButton tone="primary">+ Create task</TableActionButton>
+            </div>
+          </div>
+        </div>
+
+        <div className="overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="border-b border-white/7">
+              <tr>
+                {["Status", "Task", "Node", "Created", "Latest output", "Actions"].map(
+                  (head) => (
+                    <th
+                      key={head}
+                      className="px-3.5 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.18em] text-white/34"
+                    >
+                      {head}
+                    </th>
+                  ),
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              {taskRows.map((row, index) => (
+                <tr key={`${row.name}-${index}`} className="border-b border-white/7">
+                  <td className="px-3.5 py-3.5">
+                    <SmallBadge className={taskStatusClasses(row.status)}>
+                      {row.status}
+                    </SmallBadge>
+                  </td>
+                  <td className="px-3.5 py-3.5">
+                    <div>
+                      <p className="font-medium text-white">{row.name}</p>
+                      <p className="text-xs text-white/42">{row.subtitle}</p>
+                    </div>
+                  </td>
+                  <td className="px-3.5 py-3.5 text-white/62">{row.node}</td>
+                  <td className="px-3.5 py-3.5 text-white/46">{row.created}</td>
+                  <td className="max-w-[22rem] px-3.5 py-3.5 text-[0.82rem] text-white/46">
+                    <span className="line-clamp-2 font-mono">{row.output}</span>
+                  </td>
+                  <td className="px-3.5 py-3.5">
+                    <div className="flex items-center justify-end gap-2">
+                      <TableActionButton>Stop</TableActionButton>
+                      <TableActionButton>Details</TableActionButton>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </SurfaceCard>
+    </div>
+  );
+}
+
+function EventsScene() {
+  return (
+    <SurfaceCard className="min-h-full overflow-hidden">
+      <div className="border-b border-white/7 px-4 py-3">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-sm font-medium text-white">Workspace delivery</p>
-            <p className="mt-1 text-sm text-white/45">
-              Email and Telegram automation live beside workspace metadata.
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/32">
+              Ledger
+            </p>
+            <p className="mt-1.5 text-[0.98rem] font-medium text-white">Event stream</p>
+            <p className="mt-1 text-[0.82rem] text-white/46">
+              Severity-aware operational events ordered by recency.
             </p>
           </div>
-          <StatusBadge tone="completed">Production</StatusBadge>
-        </div>
 
-        <div className="mt-4 space-y-3">
-          {[
-            ["Automation email", "Enabled"],
-            ["Automation Telegram", "Enabled"],
-            ["Default timezone", "Europe/Istanbul"],
-            ["Archive mode", "Read-only off"],
-          ].map(([label, value]) => (
-            <div
-              key={label}
-              className="flex items-center justify-between gap-3 rounded-2xl border border-white/7 bg-black/20 px-3 py-3"
+          <div className="flex flex-wrap items-center gap-2">
+            <ControlPill label="all" />
+            <ControlPill label="All nodes" />
+            <button
+              type="button"
+              className="inline-flex h-9 items-center rounded-xl border border-white/8 bg-white/[0.03] px-3 text-[0.82rem] text-white/42"
             >
-              <span className="text-sm text-white/74">{label}</span>
-              <span className="text-xs font-medium text-white/46">{value}</span>
+              Filter type
+            </button>
+            <ControlPill label="50" />
+            <button
+              type="button"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/8 bg-white/[0.03] text-white/56"
+            >
+              <RefreshCcw className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="border-b border-white/7">
+            <tr>
+              {["Severity", "Title", "Source", "Type", "Created"].map((head) => (
+                <th
+                  key={head}
+                  className="px-3.5 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.18em] text-white/34"
+                >
+                  {head}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {events.map((event) => (
+              <tr key={`${event.title}-${event.createdAt}`} className="border-b border-white/7">
+                <td className="px-3.5 py-3.5">
+                  <SmallBadge className={eventSeverityClasses(event.severity)}>
+                    {event.severity}
+                  </SmallBadge>
+                </td>
+                <td className="max-w-[30rem] px-3.5 py-3.5">
+                  <div>
+                    <p className="font-medium text-white">{event.title}</p>
+                    <p className="mt-1 text-[0.82rem] text-white/46">{event.message}</p>
+                  </div>
+                </td>
+                <td className="px-3.5 py-3.5 text-white/62">{event.source}</td>
+                <td className="px-3.5 py-3.5 text-white/46">{event.type}</td>
+                <td className="px-3.5 py-3.5 text-white/46">{event.createdAt}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </SurfaceCard>
+  );
+}
+
+function SummaryScene({ activeView }: { activeView: Exclude<ViewKey, "dashboard"> }) {
+  const summary = summaryCopy[activeView];
+
+  return (
+    <div className="grid h-full gap-4 xl:grid-cols-[1.08fr_0.92fr]">
+      <SurfaceCard className="p-5">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/32">
+          demo summary
+        </p>
+        <p className="mt-2 text-2xl font-semibold tracking-tight text-white">
+          {summary.title}
+        </p>
+        <p className="mt-2 max-w-2xl text-sm leading-7 text-white/48">
+          {summary.description}
+        </p>
+
+        <div className="mt-6 grid gap-3">
+          {summary.bullets.map((bullet) => (
+            <div
+              key={bullet}
+              className="rounded-2xl border border-white/7 bg-[#0f0f11] px-4 py-3 text-sm leading-7 text-white/72"
+            >
+              {bullet}
             </div>
           ))}
         </div>
-      </DemoPanel>
+      </SurfaceCard>
 
-      <DemoPanel className="p-4">
-        <p className="text-sm font-medium text-white">Access and team structure</p>
-        <div className="mt-4 grid gap-3">
-          {[
-            {
-              icon: Users2,
-              title: "Workspace roles",
-              body: "Owner, admin, member, and viewer roles stay scoped to the current workspace.",
-            },
-            {
-              icon: FolderTree,
-              title: "Teams",
-              body: "Nodes and members can be grouped without leaving the operational workspace.",
-            },
-            {
-              icon: ShieldCheck,
-              title: "Root profiles",
-              body: "Desired and applied root scopes remain visible before privileged actions unlock.",
-            },
-          ].map((item) => (
-            <div
-              key={item.title}
-              className="rounded-2xl border border-white/7 bg-black/20 px-3 py-3"
-            >
-              <div className="flex items-center gap-3">
-                <item.icon className="h-4 w-4 text-primary" />
-                <p className="text-sm font-medium text-white">{item.title}</p>
+      <div className="grid gap-4">
+        <SurfaceCard className="p-5">
+          <p className="text-sm font-medium text-white">Why it exists in the hero</p>
+          <p className="mt-3 text-sm leading-7 text-white/52">
+            The dashboard preview stays faithful to the real Noderax shell, while these
+            sections summarize the adjacent surfaces operators move through after the
+            dashboard.
+          </p>
+        </SurfaceCard>
+
+        <SurfaceCard className="p-5">
+          <p className="text-sm font-medium text-white">Linked product surface</p>
+          <div className="mt-4 grid gap-3">
+            {[
+              "Workspace-aware navigation with the same left rail structure",
+              "Dark operational shell reused across nodes, tasks, settings, and updates",
+              "Summary cards here are intentionally smaller so the dashboard remains the hero focus",
+            ].map((item) => (
+              <div
+                key={item}
+                className="rounded-2xl border border-white/7 bg-[#0f0f11] px-4 py-3 text-sm leading-7 text-white/72"
+              >
+                {item}
               </div>
-              <p className="mt-2 text-sm leading-6 text-white/72">{item.body}</p>
-            </div>
-          ))}
-        </div>
-      </DemoPanel>
+            ))}
+          </div>
+        </SurfaceCard>
+      </div>
     </div>
   );
 }
@@ -880,179 +1378,173 @@ function SettingsScene() {
 export function HeroArchitecture() {
   const shouldReduceMotion = useReducedMotion() ?? false;
   const [activeView, setActiveView] = useState<ViewKey>("dashboard");
-  const [selectedNodeId, setSelectedNodeId] = useState(nodes[0]!.id);
-  const totalNodes = useTicker([136, 139, 141, 138], 2600);
-  const onlineNodes = useTicker([129, 132, 131, 133], 2200);
-  const runningTasks = useTicker([12, 14, 13, 15], 2400);
-  const queuedTasks = useTicker([3, 4, 2, 5], 2500);
-  const queuedAlerts = useTicker([7, 9, 8, 10], 2900);
-  const rolloutProgress = useTicker([64, 69, 73, 71], 3200);
-  const selectedNode = nodes.find((node) => node.id === selectedNodeId) ?? nodes[0]!;
+  const [pageIndex, setPageIndex] = useState(0);
 
   return (
-    <div className="relative h-[38rem] overflow-hidden rounded-[2rem] bg-[#09090c] text-white sm:h-[39rem] lg:h-[34rem]">
-      <div className="absolute inset-0 data-grid opacity-35" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_10%_12%,rgba(255,255,255,0.08),transparent_22%),radial-gradient(circle_at_82%_8%,rgba(255,104,64,0.16),transparent_26%),radial-gradient(circle_at_50%_100%,rgba(255,132,54,0.14),transparent_28%)]" />
+    <div className="relative h-[40.5rem] overflow-hidden rounded-[2rem] border border-white/7 bg-[#09090a] text-white lg:h-[38.5rem]">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_24%_0%,rgba(255,94,66,0.06),transparent_22%),radial-gradient(circle_at_84%_4%,rgba(255,255,255,0.05),transparent_18%)]" />
 
-      <motion.div
-        className="absolute left-0 top-0 h-56 w-56 rounded-full bg-primary/16 blur-3xl"
-        animate={
-          shouldReduceMotion
-            ? undefined
-            : { opacity: [0.14, 0.28, 0.14], scale: [0.95, 1.08, 0.97] }
-        }
-        transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div
-        className="absolute bottom-0 right-8 h-64 w-64 rounded-full bg-orange-400/12 blur-3xl"
-        animate={
-          shouldReduceMotion
-            ? undefined
-            : { opacity: [0.12, 0.22, 0.12], scale: [1, 1.08, 0.96] }
-        }
-        transition={{ duration: 10.5, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div
-        className="absolute inset-x-0 top-16 h-px bg-gradient-to-r from-transparent via-primary/35 to-transparent"
-        animate={
-          shouldReduceMotion
-            ? undefined
-            : { y: [0, 420, 0], opacity: [0, 0.72, 0] }
-        }
-        transition={{ duration: 8.5, repeat: Infinity, ease: "easeInOut" }}
-      />
-
-      <div className="relative flex h-full flex-col">
-        <div className="flex h-14 items-center justify-between gap-4 border-b border-white/8 px-4 lg:px-5">
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="flex gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-rose-400/80" />
-              <span className="h-2.5 w-2.5 rounded-full bg-amber-300/85" />
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/85" />
+      <div className="relative grid h-full grid-cols-[11rem_1fr]">
+        <aside className="flex min-h-0 flex-col border-r border-white/7 bg-[#0d0d0e]">
+          <div className="flex h-14 items-center gap-2.5 border-b border-white/7 px-3.5">
+            <div className="relative h-9 w-9 overflow-hidden rounded-xl border border-primary/12 bg-primary/8">
+              <Image
+                src="/logo-white.png"
+                alt="Noderax"
+                fill
+                className="object-contain p-1.5"
+              />
             </div>
-            <div className="hidden min-w-0 items-center gap-2 rounded-full border border-white/8 bg-white/[0.04] px-3 py-1 text-[11px] font-medium text-white/55 sm:flex">
-              <Search className="h-3.5 w-3.5 text-white/34" />
-              <span className="truncate">app.noderax.com/w/production/{activeView}</span>
+            <div className="min-w-0">
+              <p className="text-[0.9rem] font-semibold tracking-tight text-white">Noderax</p>
+              <p className="text-xs text-white/42">Operations center</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <StatusBadge tone="online">Realtime live</StatusBadge>
-            <div className="hidden items-center gap-2 rounded-full border border-white/8 bg-white/[0.04] px-2 py-1 sm:flex">
-              <div className="relative h-6 w-6 overflow-hidden rounded-full bg-primary/10">
-                <Image
-                  src="/logo-white.png"
-                  alt="Noderax"
-                  fill
-                  className="object-contain p-1"
-                />
-              </div>
-              <span className="pr-1 text-[11px] font-medium text-white/58">
-                production workspace
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid min-h-0 flex-1 grid-cols-[4.75rem_1fr] sm:grid-cols-[5.5rem_1fr] lg:grid-cols-[15.5rem_1fr]">
-          <aside className="border-r border-white/8 bg-black/18 px-2 py-4 lg:px-3">
-            <div className="mb-4 hidden items-center gap-3 rounded-[1.1rem] border border-white/8 bg-white/[0.04] px-3 py-3 lg:flex">
-              <div className="relative h-10 w-10 overflow-hidden rounded-2xl border border-white/8 bg-primary/8">
-                <Image
-                  src="/logo-white.png"
-                  alt="Noderax"
-                  fill
-                  className="object-contain p-1.5"
-                />
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-semibold tracking-tight text-white">Noderax</p>
-                <p className="text-xs text-white/42">Operations center</p>
-              </div>
-            </div>
-
+          <div className="flex-1 overflow-hidden px-2.5 py-3">
             <div className="space-y-4">
-              {navGroups.map((group) => (
+              {sidebarGroups.map((group) => (
                 <div key={group.label} className="space-y-1.5">
-                  <p className="hidden px-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/28 lg:block">
+                  <p className="px-2 text-[9px] font-semibold uppercase tracking-[0.18em] text-white/28">
                     {group.label}
                   </p>
                   <div className="space-y-1">
                     {group.items.map((item) => (
-                      <SidebarItem
-                        key={item.key}
-                        item={item}
-                        active={activeView === item.key}
-                        onSelect={setActiveView}
-                      />
+                      <div key={item.key} className="space-y-1">
+                        <SidebarLink
+                          item={item}
+                          active={activeView === item.key}
+                          onSelect={setActiveView}
+                        />
+                        {item.key === "tasks" && activeView === "tasks" ? (
+                          <div className="ml-4 space-y-1 border-l border-white/7 pl-3">
+                            <button
+                              type="button"
+                              className="flex w-full items-center rounded-xl border border-primary/24 bg-primary/12 px-2.5 py-2 text-left text-[0.8rem] text-primary"
+                            >
+                              Task runs
+                            </button>
+                            <button
+                              type="button"
+                              className="flex w-full items-center rounded-xl border border-transparent px-2.5 py-2 text-left text-[0.8rem] text-white/56 transition-colors hover:border-white/8 hover:bg-white/[0.03] hover:text-white"
+                            >
+                              Scheduled tasks
+                            </button>
+                          </div>
+                        ) : null}
+                      </div>
                     ))}
                   </div>
                 </div>
               ))}
             </div>
-          </aside>
+          </div>
 
-          <div className="flex min-w-0 flex-col">
-            <div className="border-b border-white/8 px-4 py-4 lg:px-6">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/32">
-                    demo surface
-                  </p>
-                  <h3 className="mt-1 text-xl font-semibold tracking-tight text-white lg:text-2xl">
-                    {viewMeta[activeView].title}
-                  </h3>
-                  <p className="mt-1 text-sm text-white/48">
-                    {viewMeta[activeView].description}
-                  </p>
-                </div>
+          <div className="border-t border-white/7 p-2.5">
+            <div className="rounded-[1.1rem] border border-white/8 bg-[#0f0f11] p-2.5">
+              <p className="text-xs font-medium text-white">Workspace</p>
+              <p className="mt-1 text-base font-semibold tracking-tight text-white">Main</p>
+              <p className="mt-1 text-[11px] leading-5 text-white/42">
+                Timezone Europe/Istanbul · owner access
+              </p>
+            </div>
 
-                <div className="flex flex-wrap gap-2">
-                  <StatusBadge tone="completed">Workspace admin</StatusBadge>
-                  <StatusBadge tone="running">Root-aware controls</StatusBadge>
-                </div>
+            <button
+              type="button"
+              className="mt-2.5 flex w-full items-center justify-between rounded-xl px-2 py-1.5 text-sm text-white/68 transition-colors hover:bg-white/[0.03] hover:text-white"
+            >
+              <span>Collapse</span>
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+          </div>
+        </aside>
+
+        <div className="flex min-w-0 flex-col">
+          <div className="flex h-14 items-center justify-between gap-3 border-b border-white/7 px-4.5">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <h3 className="text-[1.02rem] font-semibold tracking-tight text-white">
+                  {activeView === "dashboard" ? "Dashboard" : summaryCopy[activeView as Exclude<ViewKey, "dashboard">].title}
+                </h3>
+                {["dashboard", "nodes", "tasks", "events"].includes(activeView) ? (
+                  <SmallBadge className="border-emerald-400/16 bg-emerald-400/8 text-emerald-300">
+                    Live · Stream healthy
+                  </SmallBadge>
+                ) : null}
               </div>
+              <p className="mt-0.5 text-[0.82rem] text-white/46">
+                {activeView === "dashboard"
+                  ? "Monitor node health, workload, and recent activity."
+                  : summaryCopy[activeView as Exclude<ViewKey, "dashboard">].description}
+              </p>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-hidden px-4 py-4 lg:px-6">
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                  key={activeView}
-                  initial={shouldReduceMotion ? undefined : { opacity: 0, y: 14 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={shouldReduceMotion ? undefined : { opacity: 0, y: -10 }}
-                  transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-                  className="h-full"
-                >
-                  {activeView === "dashboard" ? (
-                    <DashboardScene
-                      totalNodes={totalNodes}
-                      onlineNodes={onlineNodes}
-                      runningTasks={runningTasks}
-                      queuedAlerts={queuedAlerts}
-                      shouldReduceMotion={shouldReduceMotion}
-                    />
-                  ) : null}
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                className="flex items-center gap-2 rounded-xl border border-white/8 bg-white/[0.03] px-3 py-1.5 text-left"
+              >
+                <div>
+                  <p className="text-[0.82rem] font-medium text-white">Main</p>
+                  <p className="text-[11px] text-white/38">Europe/Istanbul</p>
+                </div>
+                <ChevronDown className="h-4 w-4 text-white/38" />
+              </button>
 
-                  {activeView === "nodes" ? (
-                    <NodesScene
-                      selectedNode={selectedNode}
-                      setSelectedNodeId={setSelectedNodeId}
-                    />
-                  ) : null}
+              <div className="hidden items-center gap-2 rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-2 lg:flex">
+                <Search className="h-4 w-4 text-white/34" />
+                <span className="w-[14rem] truncate text-[0.82rem] text-white/40">
+                  Search nodes, tasks, schedules, members, anc
+                </span>
+              </div>
 
-                  {activeView === "tasks" ? (
-                    <TasksScene runningTasks={runningTasks} queuedTasks={queuedTasks} />
-                  ) : null}
+              <button
+                type="button"
+                className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/8 bg-white/[0.03] text-white/62"
+              >
+                <Sun className="h-4 w-4" />
+              </button>
 
-                  {activeView === "updates" ? (
-                    <UpdatesScene rolloutProgress={rolloutProgress} />
-                  ) : null}
-
-                  {activeView === "settings" ? <SettingsScene /> : null}
-                </motion.div>
-              </AnimatePresence>
+              <button
+                type="button"
+                className="flex items-center gap-2.5 rounded-xl border border-white/8 bg-white/[0.03] px-3 py-1.5"
+              >
+                <div className="flex h-6.5 w-6.5 items-center justify-center rounded-full border border-white/8 bg-white/[0.03] text-[11px] text-white/64">
+                  GC
+                </div>
+                <span className="hidden text-[0.82rem] text-white sm:block">Göktuğ Ceyhan</span>
+                <ChevronDown className="h-4 w-4 text-white/38" />
+              </button>
             </div>
+          </div>
+
+          <div className="min-h-0 flex-1 overflow-hidden p-4">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={activeView}
+                initial={shouldReduceMotion ? undefined : { opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={shouldReduceMotion ? undefined : { opacity: 0, y: -8 }}
+                transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                className="h-full"
+              >
+                {activeView === "dashboard" ? (
+                  <DashboardScene
+                    pageIndex={pageIndex}
+                    setPageIndex={setPageIndex}
+                    shouldReduceMotion={shouldReduceMotion}
+                  />
+                ) : activeView === "nodes" ? (
+                  <NodesScene />
+                ) : activeView === "tasks" ? (
+                  <TasksScene />
+                ) : activeView === "events" ? (
+                  <EventsScene />
+                ) : (
+                  <SummaryScene activeView={activeView as Exclude<ViewKey, "dashboard">} />
+                )}
+              </motion.div>
+            </AnimatePresence>
           </div>
         </div>
       </div>
