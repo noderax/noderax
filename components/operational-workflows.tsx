@@ -23,12 +23,12 @@ const workflows = [
     icon: ScanLine,
     title: "Installer-Managed Setup",
     description:
-      "Validate PostgreSQL, Redis, and optional SMTP, then persist runtime settings with restart-aware platform controls.",
+      "Install with one command, validate PostgreSQL, Redis, and optional SMTP, then persist runtime settings with restart-aware platform controls.",
     phases: [
+      "Run installer",
       "Validate services",
       "Write install state",
       "Apply runtime config",
-      "Restart safely",
     ],
     progress: 100,
     status: "Platform bootstrap",
@@ -58,17 +58,17 @@ const workflows = [
   },
   {
     icon: PackageCheck,
-    title: "Official Agent Rollouts",
+    title: "Update Center",
     description:
-      "Tagged releases appear in Updates with sequential deployment, eligibility checks, and retry/skip/resume/cancel/rollback controls.",
+      "Tagged agent releases and newer control-plane builds appear in Updates with staged download, guarded apply, and rollback-aware execution.",
     phases: [
       "Discover release",
-      "Select nodes",
-      "Sequential rollout",
-      "Heartbeat confirm",
+      "Stage download",
+      "Apply or roll out",
+      "Verify health",
     ],
     progress: 79,
-    status: "Fleet lifecycle",
+    status: "Release lifecycle",
   },
 ];
 
@@ -89,8 +89,8 @@ export function OperationalWorkflows() {
             </h2>
             <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
               The current product already covers platform setup, node
-              onboarding, guarded execution, and official agent release
-              management without inventing side consoles.
+              onboarding, guarded execution, and staged update management
+              without inventing side consoles.
             </p>
           </div>
         </ScrollReveal>

@@ -1,17 +1,20 @@
 "use client";
 
+import { useState } from "react";
 import { motion, useReducedMotion, type Variants } from "motion/react";
 import {
+  Check,
   ArrowRight,
   ArrowUpCircle,
   BellRing,
+  Copy,
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
 import { HeroArchitecture } from "@/components/hero-architecture";
 import { GradientText } from "@/components/ui/gradient-text";
 import { Card, CardContent } from "@/components/ui/card";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const contentVariants: Variants = {
@@ -51,8 +54,8 @@ const summaryCards = [
   },
   {
     icon: ArrowUpCircle,
-    title: "Official Rollouts",
-    body: "Tagged agent releases, monitored rollout steps, and retry or rollback controls.",
+    title: "Update Center",
+    body: "Tagged agent releases and installer-managed control-plane updates land in one staged apply flow.",
   },
 ];
 
@@ -84,13 +87,27 @@ const orbitRings = [
 ] as const;
 
 const heroHighlights = [
+  "Installer-managed self-update",
   "5-minute terminal reattach",
-  "7-day transcript retention",
   "Email + Telegram routing",
 ];
 
+const INSTALLER_COMMAND =
+  "curl -fsSL https://cdn.noderax.net/noderax-platform/install.sh | sudo bash";
+
 export function Hero() {
+  const [copied, setCopied] = useState(false);
   const shouldReduceMotion = useReducedMotion() ?? false;
+
+  const handleCopyInstallCommand = async () => {
+    try {
+      await navigator.clipboard.writeText(INSTALLER_COMMAND);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
+  };
 
   return (
     <section className="relative overflow-hidden pt-28 pb-20 lg:pt-36 lg:pb-24">
@@ -195,16 +212,16 @@ export function Hero() {
             </GradientText>
           </motion.h1>
 
-          <motion.p
+          {/* <motion.p
             variants={itemVariants}
             className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl"
           >
             Noderax combines a Next.js operator surface, a NestJS orchestration
             API, and a Go agent so teams can install nodes, stream telemetry,
             open browser terminals, tune Email and Telegram delivery, and roll
-            out official tagged agent releases from one workspace-aware control
-            plane.
-          </motion.p>
+            out official tagged agent releases while platform admins stage
+            newer control-plane builds from one workspace-aware control plane.
+          </motion.p> */}
 
           <motion.div
             variants={itemVariants}
@@ -244,6 +261,37 @@ export function Hero() {
                 {highlight}
               </div>
             ))}
+          </motion.div>
+
+          <motion.div variants={itemVariants} className="mt-8 w-full max-w-4xl">
+            <div className="rounded-[1.75rem] border border-border/60 bg-card/70 p-4 text-left shadow-xl backdrop-blur-xl sm:p-5">
+              <div className="max-w-1xl">
+                <p className="text-sm font-semibold text-foreground">
+                  Self-hosted quick start
+                </p>
+                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                  Install the control plane with one command, complete guided
+                  setup at <span className="font-mono text-foreground">/setup</span>,
+                  then let the dashboard surface future control-plane updates
+                  when a newer official build is available.
+                </p>
+              </div>
+
+              <div className="mt-4 flex items-center gap-2 rounded-2xl border border-border/70 bg-background/80 p-2 pl-4 shadow-inner">
+                <code className="min-w-0 flex-1 overflow-x-auto whitespace-nowrap font-mono text-sm text-foreground">
+                  {INSTALLER_COMMAND}
+                </code>
+                <Button
+                  variant={copied ? "default" : "outline"}
+                  size="sm"
+                  className="shrink-0 rounded-xl"
+                  onClick={handleCopyInstallCommand}
+                >
+                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  {copied ? "Copied" : "Copy"}
+                </Button>
+              </div>
+            </div>
           </motion.div>
         </motion.div>
 

@@ -9,30 +9,30 @@ const steps = [
   {
     number: "01",
     icon: Download,
-    title: "Install the Agent",
+    title: "Install the Control Plane",
     description:
-      "One-liner install command deploys the lightweight Noderax agent on any Linux server. Supports Ubuntu, Debian, CentOS, and RHEL.",
-    code: "curl -sSL https://get.noderax.com | bash",
+      "One published installer command boots the self-hosted control plane with bundled nginx, PostgreSQL, Redis, and HTTPS provisioning on supported Linux hosts.",
+    code: "curl -fsSL https://cdn.noderax.net/noderax-platform/install.sh | sudo bash",
     color: "text-primary",
     gradient: "from-orange-500/10 to-red-500/10",
   },
   {
     number: "02",
     icon: Link2,
-    title: "Connect to Control Plane",
+    title: "Complete Guided Setup",
     description:
-      "The agent automatically registers with your Noderax instance. Live bootstrap progress shows real-time connection status.",
-    code: "Agent connected — node 'prod-api-01' online ✓",
+      "Open /setup, validate PostgreSQL, Redis, and optional SMTP, then let the installer-managed runtime promote itself into the full control plane.",
+    code: "https://dash.example.com/setup -> validate -> apply runtime",
     color: "text-emerald-400",
     gradient: "from-emerald-500/10 to-teal-500/10",
   },
   {
     number: "03",
     icon: Zap,
-    title: "Operate & Monitor",
+    title: "Enroll Nodes & Operate",
     description:
-      "Run tasks, monitor telemetry, open terminals, schedule operations, and manage your fleet from a unified workspace dashboard.",
-    code: "noderax task run --template deploy --target prod-*",
+      "Generate short-lived add-node bootstrap commands from the dashboard, then monitor telemetry, open terminals, schedule tasks, and manage updates in one workspace-aware shell.",
+    code: "Dashboard -> Add node -> generate bootstrap command -> live enroll",
     color: "text-violet-400",
     gradient: "from-violet-500/10 to-indigo-500/10",
   },
@@ -56,8 +56,8 @@ export function HowItWorks() {
               <GradientText>under 5 minutes</GradientText>
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Three steps to go from zero to full fleet visibility. No complex
-              configuration needed.
+              Three steps to go from zero to a running self-hosted control
+              plane and live node visibility.
             </p>
           </div>
         </ScrollReveal>

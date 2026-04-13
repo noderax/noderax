@@ -26,7 +26,7 @@ const plans = [
     comingSoon: false,
     highlights: [
       "Installer-managed setup with PostgreSQL, Redis, and optional SMTP validation.",
-      "Workspace-aware control plane, browser terminals, notifications, and official agent rollouts.",
+      "Workspace-aware control plane, browser terminals, notifications, official agent rollouts, and dashboard-driven control-plane self-update.",
       "Best fit if you want to evaluate, deploy, and operate Noderax on your own hosts.",
     ],
   },

@@ -22,7 +22,7 @@ const stack = [
     icon: Workflow,
     title: "NestJS Orchestration API",
     description:
-      "Installer-managed setup, scheduling, audit logging, notifications, and rollout orchestration live here.",
+      "Installer-managed setup, control-plane self-update orchestration, scheduling, audit logging, notifications, and rollout orchestration live here.",
   },
   {
     icon: Server,
@@ -40,7 +40,7 @@ const stack = [
     icon: Radio,
     title: "Realtime + Terminal Channels",
     description:
-      "Dedicated /realtime and /terminal namespaces keep installs, metrics, tasks, and shell sessions current.",
+      "Dedicated /realtime and /terminal namespaces keep installs, metrics, update state, tasks, and shell sessions current.",
   },
   {
     icon: ShieldCheck,

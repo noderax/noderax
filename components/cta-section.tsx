@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 const callouts = [
   "Installer-managed setup with PostgreSQL, Redis, and optional SMTP checks",
   "Two-step add-node onboarding with live bootstrap progress",
-  "Root-aware tasks, terminals, notifications, and official release rollouts",
+  "Root-aware tasks, terminals, notifications, agent rollouts, and control-plane self-update",
 ];
 
 export function CTASection() {
@@ -36,8 +36,9 @@ export function CTASection() {
                 </h2>
                 <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground/90">
                   The current platform already covers onboarding, telemetry,
-                  terminals, alerting, and agent release management without
-                  requiring extra sidecars or bolt-on operator tools.
+                  terminals, alerting, agent release management, and staged
+                  control-plane updates without requiring extra sidecars or
+                  bolt-on operator tools.
                 </p>
 
                 <div className="mt-10 flex flex-wrap items-center gap-4">

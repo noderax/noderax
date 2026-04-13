@@ -546,11 +546,11 @@ const summaryCopy: Record<
   },
   updates: {
     title: "Updates",
-    description: "Control official tagged releases and rollout recovery.",
+    description: "Control official tagged agent releases and installer-managed control-plane updates.",
     bullets: [
-      "Only official tags appear in the updates center",
-      "Sequential rollout waves with retry and rollback controls",
-      "Per-target state stays visible during rollout execution",
+      "Only official agent tags and official control-plane builds appear in the updates center",
+      "Platform admins can stage downloads, then explicitly apply prepared control-plane builds",
+      "Per-target rollout and prepared-release state stay visible during execution",
     ],
   },
   "platform-audit": {

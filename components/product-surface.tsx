@@ -45,9 +45,9 @@ const productSurface = [
     icon: MonitorCog,
     title: "Node Onboarding & Inventory",
     description:
-      "Two-step add-node onboarding gives you short-lived bootstrap commands, live install progress, and Linux inventory with telemetry.",
+      "Two-step add-node onboarding gives you short-lived bootstrap commands, live install progress, and Linux inventory with telemetry once the control plane is up.",
     bullets: [
-      "One-click agent install command generation",
+      "Short-lived agent bootstrap command generation from the dashboard",
       "Node version, platform, and kernel visibility",
       "Maintenance mode and online or offline state tracking",
     ],
@@ -76,13 +76,13 @@ const productSurface = [
   },
   {
     icon: ArrowUpCircle,
-    title: "Agent Release Control",
+    title: "Update Center",
     description:
-      "Official tagged agent releases flow into an updates center with sequential rollouts and recovery controls.",
+      "Official tagged agent releases and installer-managed control-plane builds flow into one updates center with staged download, apply, and recovery controls.",
     bullets: [
       "Release notes resolved from the agent changelog",
-      "Retry, skip, resume, cancel, and rollback actions",
-      "Version-aware node eligibility and maintenance gating",
+      "Platform admins get new control-plane build alerts and can stage or apply them from the dashboard",
+      "Retry, skip, resume, cancel, rollback, and version-aware node eligibility controls",
     ],
   },
 ];
@@ -107,8 +107,8 @@ export function ProductSurface() {
             </h2>
             <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
               What operators can do today: onboard nodes, scope privilege, tune
-              alert delivery, inspect audits, and ship official agent releases
-              from one web surface.
+              alert delivery, inspect audits, ship official agent releases, and
+              stage control-plane updates from one web surface.
             </p>
           </div>
         </ScrollReveal>

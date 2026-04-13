@@ -17,7 +17,7 @@ const jetBrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Noderax — Infrastructure Control Plane",
   description:
-    "Workspace-aware Linux infrastructure control plane with live telemetry, browser terminals, root access profiles, Email and Telegram alert routing, and official agent rollouts.",
+    "Workspace-aware Linux infrastructure control plane with guided self-hosted setup, live telemetry, browser terminals, root access profiles, official agent rollouts, and installer-managed control-plane self-update.",
   keywords: [
     "infrastructure",
     "control plane",
@@ -31,12 +31,14 @@ export const metadata: Metadata = {
     "workspace-aware operations",
     "root access profiles",
     "agent rollouts",
+    "control plane self-update",
+    "guided setup",
     "node notifications",
   ],
   openGraph: {
     title: "Noderax — Infrastructure Control Plane",
     description:
-      "Operate Linux fleets through a Next.js web surface, NestJS orchestration API, and Go agents coordinated by realtime state.",
+      "Operate Linux fleets through a Next.js web surface, NestJS orchestration API, and Go agents with guided setup, realtime state, and installer-managed control-plane updates.",
     type: "website",
   },
 };

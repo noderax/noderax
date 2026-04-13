@@ -21,7 +21,7 @@ const items = [
   {
     question: "What is the onboarding process for new nodes?",
     answer:
-      "Operators create a workspace-scoped install request first, then Noderax generates a short-lived one-click bootstrap command. While that script runs on the host, install progress streams back into the web UI until the node is enrolled.",
+      "Operators first install the control plane with the published one-liner and complete guided setup at /setup. After that, each workspace can create a short-lived node bootstrap command, and install progress streams back into the web UI until the node is enrolled.",
   },
   {
     question: "How is privileged access controlled on each node?",
@@ -42,6 +42,11 @@ const items = [
     question: "How are agent releases shipped across the fleet?",
     answer:
       "The Updates center only surfaces official tagged releases, then walks eligible nodes through a sequential rollout plan. Operators can retry, skip, resume, cancel, or roll back targets while watching status converge in the same view.",
+  },
+  {
+    question: "How does the self-hosted control plane update?",
+    answer:
+      "Installer-managed deployments compare immutable release IDs rather than a changing marketing version string. When a newer official build exists, platform admins see an alert in the dashboard, stage the download from Updates, then explicitly apply it so the host-side supervisor can roll API, web, and nginx forward with health checks and rollback protection.",
   },
 ];
 
