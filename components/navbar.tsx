@@ -24,6 +24,8 @@ const navLinks = [
   { label: "FAQ", href: "#faq" },
 ];
 
+const docsUrl = "https://docs.noderax.net";
+
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -98,6 +100,18 @@ export function Navbar() {
                 <SystemStatus placement="bottom" />
               </div>
               <a
+                href={docsUrl}
+                target="_blank"
+                rel="noreferrer"
+                className={cn(
+                  buttonVariants({ variant: "ghost", size: "sm" }),
+                  "px-4 font-medium text-muted-foreground hover:text-foreground",
+                )}
+              >
+                Docs
+                <ExternalLink className="ml-1 h-3.5 w-3.5" />
+              </a>
+              {/* <a
                 href="#architecture"
                 className={cn(
                   buttonVariants({ variant: "ghost", size: "sm" }),
@@ -105,7 +119,7 @@ export function Navbar() {
                 )}
               >
                 View Architecture
-              </a>
+              </a> */}
               <a
                 href="https://github.com/noderax"
                 target="_blank"
@@ -161,6 +175,18 @@ export function Navbar() {
                 ))}
               </div>
               <div className="mt-5 grid gap-3">
+                <a
+                  href={docsUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => close()}
+                  className={cn(
+                    buttonVariants({ variant: "outline", size: "default" }),
+                    "h-11 rounded-xl",
+                  )}
+                >
+                  Docs
+                </a>
                 <a
                   href="#architecture"
                   onClick={() => close()}

@@ -304,9 +304,44 @@ export function Hero() {
         >
           <motion.div variants={itemVariants} className="relative z-10">
             <div className="pointer-events-none absolute inset-0 -inset-x-4 -inset-y-4 z-[-1] rounded-[2.5rem] bg-gradient-to-b from-primary/5 to-transparent blur-xl" />
-            <div className="glow-border rounded-[2rem]">
-              <div className="relative overflow-hidden rounded-[2rem] border border-border/60 bg-card/40 p-2 shadow-2xl backdrop-blur-xl">
-                <HeroArchitecture />
+            <div className="hidden lg:block">
+              <div className="glow-border rounded-[2rem]">
+                <div className="relative overflow-hidden rounded-[2rem] border border-border/60 bg-card/40 p-2 shadow-2xl backdrop-blur-xl">
+                  <HeroArchitecture />
+                </div>
+              </div>
+            </div>
+            <div className="lg:hidden">
+              <div className="rounded-[2rem] border border-border/60 bg-card/60 p-6 shadow-xl backdrop-blur-xl">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/80">
+                  Product surface
+                </p>
+                <h3 className="mt-3 text-2xl font-bold tracking-tight text-foreground">
+                  Mobile keeps the message, not the dashboard chrome.
+                </h3>
+                <p className="mt-3 text-sm leading-7 text-muted-foreground">
+                  The full live dashboard preview is reserved for larger screens.
+                  On mobile, focus stays on guided install, scoped privilege,
+                  terminals, notifications, and update orchestration.
+                </p>
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-2xl border border-border/60 bg-background/70 p-4">
+                    <p className="text-sm font-semibold text-foreground">
+                      Guided self-hosted setup
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                      Install with one command, finish <span className="font-mono text-foreground">/setup</span>, then operate the HA runtime.
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-border/60 bg-background/70 p-4">
+                    <p className="text-sm font-semibold text-foreground">
+                      Staged updates
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                      Agent rollouts and control-plane releases stay staged, explicit, and observable.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </motion.div>

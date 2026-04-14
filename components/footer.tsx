@@ -20,6 +20,7 @@ const footerLinks = {
     },
   ],
   Details: [
+    { label: "Docs", href: "https://docs.noderax.net" },
     { label: "Deployment paths", href: "#pricing" },
     { label: "Technical FAQ", href: "#faq" },
     { label: "Setup & rollouts", href: "#operations" },
