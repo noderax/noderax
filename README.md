@@ -42,6 +42,35 @@ pnpm lint
 pnpm build
 ```
 
+## Cloudflare Worker Deploy
+
+`noderax-saas` is deployed as a Cloudflare Worker using `wrangler deploy`.
+
+Primary commands:
+
+```bash
+pnpm worker:build
+pnpm worker:deploy
+```
+
+Equivalent manual path:
+
+```bash
+pnpm worker:build
+wrangler deploy
+```
+
+Requirements:
+
+- `wrangler login` or `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_ACCOUNT_ID`
+- existing R2 bucket `noderax-saas-opennext-cache`
+
+CI deploy is defined in `.github/workflows/worker-deploy.yml` and expects:
+
+- `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_ACCOUNT_ID`
+
 ## Project Notes
 
 - The site is intentionally marketing-focused, not the operator console.
