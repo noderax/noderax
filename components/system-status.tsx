@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Cloud, Server } from "lucide-react";
+import { Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type ServiceState = {
@@ -9,16 +9,12 @@ type ServiceState = {
   status: "ok" | "down";
   endpoint: string;
   note?: string;
-  timestamp?: string;
-  startedAt?: string;
-  bootId?: string;
 };
 
 type SystemStatusPayload = {
   overall: "ok" | "degraded";
   checkedAt: string;
-  cloud: ServiceState;
-  agent: ServiceState;
+  cdn: ServiceState;
 };
 
 type SystemStatusProps = {
@@ -42,13 +38,7 @@ function statusDotClasses(status: "ok" | "down") {
 const fallbackState: SystemStatusPayload = {
   overall: "degraded",
   checkedAt: "",
-  cloud: {
-    service: "noderax-api",
-    status: "down",
-    endpoint: "https://api.noderax.net/api/v1/health",
-    note: "Fetching live status...",
-  },
-  agent: {
+  cdn: {
     service: "noderax-agent-cdn",
     status: "down",
     endpoint: "https://cdn.noderax.net/",
@@ -82,15 +72,10 @@ export function SystemStatus({
         ...prev,
         overall: "degraded",
         checkedAt: new Date().toISOString(),
-        cloud: {
-          ...prev.cloud,
+        cdn: {
+          ...prev.cdn,
           status: "down",
-          note: "Cloud check temporarily unavailable",
-        },
-        agent: {
-          ...prev.agent,
-          status: "down",
-          note: "Agent check temporarily unavailable",
+          note: "CDN check temporarily unavailable",
         },
       }));
     } finally {
@@ -116,82 +101,37 @@ export function SystemStatus({
 
   const panelContent = (
     <>
-      <div className="grid gap-2 sm:grid-cols-2">
+      <div className="grid gap-2">
         <a
-          href={status.cloud.endpoint}
+          href={status.cdn.endpoint}
           target="_blank"
           rel="noreferrer"
           className="rounded-xl border border-border/50 bg-card/70 p-3 transition-colors hover:border-primary/30"
         >
           <div className="mb-2 flex items-center justify-between">
             <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-foreground/90">
-              <Cloud className="h-3.5 w-3.5 text-primary" />
-              Cloud
+              <Package className="h-3.5 w-3.5 text-primary" />
+              CDN
             </span>
             <span
               className={cn(
                 "rounded-full px-2 py-0.5 text-[10px] font-bold uppercase",
-                statusBadgeClasses(status.cloud.status),
+                statusBadgeClasses(status.cdn.status),
               )}
             >
-              {status.cloud.status}
+              {status.cdn.status}
             </span>
           </div>
           <p className="truncate text-[11px] font-semibold text-foreground/90">
-            {status.cloud.service}
+            {status.cdn.service}
           </p>
-          {status.cloud.timestamp ? (
-            <p className="truncate text-[10px] text-muted-foreground">
-              checked: {status.cloud.timestamp}
-            </p>
-          ) : null}
-          {status.cloud.startedAt ? (
+          {status.cdn.note ? (
             <p className="mt-1 truncate text-[10px] text-muted-foreground">
-              started: {status.cloud.startedAt}
-            </p>
-          ) : null}
-          {status.cloud.bootId ? (
-            <p className="truncate text-[10px] text-muted-foreground">
-              boot: {status.cloud.bootId}
-            </p>
-          ) : null}
-          {status.cloud.note ? (
-            <p className="mt-1 truncate text-[10px] text-muted-foreground">
-              {status.cloud.note}
-            </p>
-          ) : null}
-        </a>
-
-        <a
-          href={status.agent.endpoint}
-          target="_blank"
-          rel="noreferrer"
-          className="rounded-xl border border-border/50 bg-card/70 p-3 transition-colors hover:border-primary/30"
-        >
-          <div className="mb-2 flex items-center justify-between">
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-foreground/90">
-              <Server className="h-3.5 w-3.5 text-primary" />
-              Agent
-            </span>
-            <span
-              className={cn(
-                "rounded-full px-2 py-0.5 text-[10px] font-bold uppercase",
-                statusBadgeClasses(status.agent.status),
-              )}
-            >
-              {status.agent.status}
-            </span>
-          </div>
-          <p className="truncate text-[11px] font-semibold text-foreground/90">
-            {status.agent.service}
-          </p>
-          {status.agent.note ? (
-            <p className="mt-1 text-[10px] text-muted-foreground">
-              {status.agent.note}
+              {status.cdn.note}
             </p>
           ) : null}
           <p className="truncate text-[10px] text-muted-foreground">
-            {status.agent.endpoint}
+            {status.cdn.endpoint}
           </p>
         </a>
       </div>

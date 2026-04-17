@@ -3,21 +3,9 @@ type ServiceState = {
   status: "ok" | "down";
   endpoint: string;
   note?: string;
-  timestamp?: string;
-  startedAt?: string;
-  bootId?: string;
 };
 
-type CloudHealthPayload = {
-  service?: string;
-  status?: string;
-  timestamp?: string;
-  startedAt?: string;
-  bootId?: string;
-};
-
-const CLOUD_ENDPOINT = "https://api.noderax.net/api/v1/health";
-const AGENT_ENDPOINT = "https://cdn.noderax.net/";
+const CDN_ENDPOINT = "https://cdn.noderax.net/";
 const REQUEST_TIMEOUT_MS = 6500;
 
 async function fetchWithTimeout(url: string, init?: RequestInit) {
@@ -35,101 +23,46 @@ async function fetchWithTimeout(url: string, init?: RequestInit) {
   }
 }
 
-function downState(
-  service: string,
-  endpoint: string,
-  note: string,
-): ServiceState {
+function downState(note: string): ServiceState {
   return {
-    service,
+    service: "noderax-agent-cdn",
     status: "down",
-    endpoint,
+    endpoint: CDN_ENDPOINT,
     note,
   };
 }
 
-async function getCloudState(): Promise<ServiceState> {
+async function getCdnState(): Promise<ServiceState> {
   try {
-    const response = await fetchWithTimeout(CLOUD_ENDPOINT, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      return downState(
-        "noderax-api",
-        CLOUD_ENDPOINT,
-        `Health check failed (${response.status})`,
-      );
-    }
-
-    const payload = (await response.json()) as CloudHealthPayload;
-    const resolvedStatus = payload.status === "ok" ? "ok" : "down";
-
-    return {
-      service: payload.service ?? "noderax-api",
-      status: resolvedStatus,
-      endpoint: CLOUD_ENDPOINT,
-      note:
-        resolvedStatus === "ok"
-          ? "Cloud health endpoint reachable"
-          : "Cloud health returned non-ok",
-      timestamp: payload.timestamp,
-      startedAt: payload.startedAt,
-      bootId: payload.bootId,
-    };
-  } catch {
-    return downState(
-      "noderax-api",
-      CLOUD_ENDPOINT,
-      "Cloud health request timed out or failed",
-    );
-  }
-}
-
-async function getAgentState(): Promise<ServiceState> {
-  try {
-    const response = await fetchWithTimeout(AGENT_ENDPOINT, {
+    const response = await fetchWithTimeout(CDN_ENDPOINT, {
       method: "GET",
       redirect: "follow",
     });
 
     if (!response.ok) {
-      return downState(
-        "noderax-agent-cdn",
-        AGENT_ENDPOINT,
-        `CDN check failed (${response.status})`,
-      );
+      return downState(`CDN check failed (${response.status})`);
     }
 
     return {
       service: "noderax-agent-cdn",
       status: "ok",
-      endpoint: AGENT_ENDPOINT,
+      endpoint: CDN_ENDPOINT,
       note: "Agent package CDN reachable",
     };
   } catch {
-    return downState(
-      "noderax-agent-cdn",
-      AGENT_ENDPOINT,
-      "CDN request timed out or failed",
-    );
+    return downState("CDN request timed out or failed");
   }
 }
 
 export async function GET() {
-  const [cloud, agent] = await Promise.all([getCloudState(), getAgentState()]);
-  const overall =
-    cloud.status === "ok" && agent.status === "ok" ? "ok" : "degraded";
+  const cdn = await getCdnState();
+  const overall = cdn.status === "ok" ? "ok" : "degraded";
 
   return Response.json(
     {
       overall,
       checkedAt: new Date().toISOString(),
-      cloud,
-      agent,
+      cdn,
     },
     {
       headers: {
