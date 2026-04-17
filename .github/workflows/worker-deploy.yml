@@ -47,5 +47,15 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Verify Cloudflare auth
+        shell: bash
+        run: pnpm exec wrangler whoami --account "${CLOUDFLARE_ACCOUNT_ID}"
+
+      - name: Verify R2 bucket access
+        shell: bash
+        run: |
+          set -euo pipefail
+          pnpm exec wrangler r2 bucket list | grep -F "noderax-saas-opennext-cache"
+
       - name: Deploy Worker
         run: pnpm run deploy

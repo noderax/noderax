@@ -60,11 +60,23 @@ pnpm worker:build
 wrangler deploy
 ```
 
+The repository scripts pass `--experimental-autoconfig=false` so Wrangler deploys
+the built `.open-next/worker.js` directly instead of re-detecting the OpenNext
+framework and re-entering `opennextjs-cloudflare deploy`.
+
 Requirements:
 
 - `wrangler login` or `CLOUDFLARE_API_TOKEN`
 - `CLOUDFLARE_ACCOUNT_ID`
 - existing R2 bucket `noderax-saas-opennext-cache`
+
+If CI fails with `403 Authentication error` while checking the R2 cache bucket,
+the Cloudflare token is valid for Workers but does not have enough R2 access for
+the configured account. The token used here must be able to:
+
+- deploy Workers
+- read the target account
+- list and bind the `noderax-saas-opennext-cache` R2 bucket
 
 CI deploy is defined in `.github/workflows/worker-deploy.yml` and expects:
 
