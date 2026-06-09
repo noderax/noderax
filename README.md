@@ -16,7 +16,9 @@ The site now reflects the current product behavior:
 Hero install command:
 
 ```bash
-curl -fsSL https://cdn.noderax.net/noderax-platform/install.sh | sudo bash
+curl -fsSLo noderax-platform-install.sh https://cdn.noderax.net/noderax-platform/install.sh
+# verify the published SHA-256 before sudo
+sudo bash noderax-platform-install.sh
 ```
 
 ## Local Development

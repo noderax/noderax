@@ -93,7 +93,7 @@ const heroHighlights = [
 ];
 
 const INSTALLER_COMMAND =
-  "curl -fsSL https://cdn.noderax.net/noderax-platform/install.sh | sudo bash";
+  "curl -fsSLo noderax-platform-install.sh https://cdn.noderax.net/noderax-platform/install.sh\n# verify published SHA-256 before sudo\nsudo bash noderax-platform-install.sh";
 
 export function Hero() {
   const [copied, setCopied] = useState(false);

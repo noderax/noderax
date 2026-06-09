@@ -12,7 +12,7 @@ const steps = [
     title: "Install the Control Plane",
     description:
       "One published installer command boots the self-hosted control plane with bundled nginx, PostgreSQL, Redis, and HTTPS provisioning on supported Linux hosts.",
-    code: "curl -fsSL https://cdn.noderax.net/noderax-platform/install.sh | sudo bash",
+    code: "curl -fsSLo noderax-platform-install.sh https://cdn.noderax.net/noderax-platform/install.sh\n# verify published SHA-256 before sudo\nsudo bash noderax-platform-install.sh",
     color: "text-primary",
     gradient: "from-orange-500/10 to-red-500/10",
   },
