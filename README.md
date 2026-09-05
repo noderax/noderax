@@ -93,3 +93,7 @@ CI deploy is defined in `.github/workflows/worker-deploy.yml` and expects:
   - `README.md`
   - `noderax-platform-release/README.md`
 - When installer, setup, update-center, or release behavior changes, update this site copy at the same time so the public promise stays consistent with the shipped bundle.
+
+## Dependency updates (2026-09-05)
+
+Use Node.js 24.15+ and pnpm 10.33.0. TypeScript stays on 6.0.x to match typescript-eslint support. ESLint stays on 9.x to match Next.js lint plugins; newly enabled React Compiler diagnostics remain warnings. Validate both pnpm build and pnpm worker:build when upgrading Next.js or OpenNext.
