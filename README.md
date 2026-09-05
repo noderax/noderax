@@ -62,7 +62,7 @@ pnpm worker:build
 wrangler deploy
 ```
 
-The repository scripts pass `--experimental-autoconfig=false` so Wrangler deploys
+The repository scripts pass `--autoconfig=false` so Wrangler deploys
 the built `.open-next/worker.js` directly instead of re-detecting the OpenNext
 framework and re-entering `opennextjs-cloudflare deploy`.
 
